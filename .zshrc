@@ -95,7 +95,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   fi
 
   # Launch tmux
-  # exec $(tmux attach || tmux new)
+  exec $(tmux attach || tmux new)
 fi
 
 eval "$(zoxide init zsh)"
