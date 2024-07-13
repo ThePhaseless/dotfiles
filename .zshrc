@@ -79,11 +79,59 @@ plugins=(git command-not-found common-aliases git-auto-fetch sudo zsh-autocomple
 zstyle ':completion:*:*:docker:*' option-stacking yes
 zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
-# Install oh-my-zsh if not installed
-if [[ ! -d "$ZSH" ]]; then
-  echo "Oh My Zsh not found. Installing..."
-  KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+
+# Run only outside of tmux
+if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
+
+  # Check if stow
+  if ! command -v stow -V &> /dev/null; then
+    echo "tmux is not installed!"
+  else
+    dotfiles_path=$HOME/.dotfiles
+    git -C $dotfiles_path pull
+    stow -t "$HOME" -d $dotfiles_path
+  fi
+
+  # Check if tmux is installed
+  if ! command -v tmux -V &> /dev/null; then
+    echo "tmux is not installed!"
+  fi
+
+  # Install oh-my-zsh if not installed
+  if [[ ! -d "$ZSH" ]]; then
+    echo "Oh My Zsh not found. Installing..."
+    KEEP_ZSHRC=yes sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)" "" --unattended
+  fi
+
+  # Check for .tmux does not exist
+  tmux_path=$HOME/.tmux
+  if [ ! -d tmux_path ]; then
+    git clone https://github.com/gpakosz/.tmux.git tmux_path
+    ln -s -f tmux_path/.tmux.conf
+    cp tmux_path/.tmux.conf.local .
+  else
+    git -C tmux_path pull
+  fi
+
+  # Check for .fzf does not exist
+  fzf_path=$HOME/.fzf
+  if [ ! -d fzf_path ]; then
+    git clone --depth 1 https://github.com/junegunn/fzf.git fzf_path
+    fzf_path/install --all
+  else
+    git -C fzf_path pull
+    fzf_path/install --bin
+  fi
+
+  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+  eval "$(zoxide init zsh)"
+
+  exec $(tmux attach || tmux new)
+
+  clear
 fi
+
+
 
 fpath+=${ZSH_CUSTOM:-${ZSH:-~/.oh-my-zsh}/custom}/plugins/zsh-completions/src
 source $ZSH/oh-my-zsh.sh
@@ -116,38 +164,3 @@ source $ZSH/oh-my-zsh.sh
 # Example aliases
 # alias zshconfig="mate ~/.zshrc"
 # alias ohmyzsh="mate ~/.oh-my-zsh"
-
-# Check if tmux is installed
-if ! command -v tmux &> /dev/null; then
-  echo "tmux is not installed!"
-fi
-
-# Run only outside of tmux
-if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
-  # Check for .tmux does not exist
-  tmux_path=$HOME/.tmux
-  if [ ! -d tmux_path ]; then
-    git clone https://github.com/gpakosz/.tmux.git tmux_path
-    ln -s -f tmux_path/.tmux.conf
-    cp tmux_path/.tmux.conf.local .
-  else
-    git -C tmux_path pull
-  fi
-
-  # Check for .fzf does not exist
-  fzf_path=$HOME/.fzf
-  if [ ! -d fzf_path ]; then
-    git clone --depth 1 https://github.com/junegunn/fzf.git fzf_path
-    fzf_path/install --all
-  else
-    git -C fzf_path pull
-    fzf_path/install --bin
-  fi
-
-  [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
-  eval "$(zoxide init zsh)"
-
-  exec $(tmux attach || tmux new)
-
-  clear
-fi
