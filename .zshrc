@@ -5,6 +5,7 @@
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
+autoload -Uz zrecompile
 zstyle ':omz:update' mode auto # update automatically without asking
 
 #COMPLETION_WAITING_DOTS="true"
@@ -23,6 +24,11 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 mkdir "$HOME"/.local/bin -p
 if [ -d "$HOME/.local/bin" ]; then
   PATH="$HOME/.local/bin:$PATH"
+fi
+
+if ! command -v tmux &>/dev/null;then
+  echo "tmux not installed"
+  return 1
 fi
 
 # Run only outside of tmux
