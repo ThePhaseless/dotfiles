@@ -6,6 +6,7 @@
 export ZSH="$HOME/.oh-my-zsh"
 
 autoload -Uz zrecompile
+autoload -Uz compinit
 zstyle ':omz:update' mode auto # update automatically without asking
 
 #COMPLETION_WAITING_DOTS="true"
@@ -110,4 +111,5 @@ eval "$(zoxide init zsh)"
 source "$HOME"/.antidote/antidote.zsh
 antidote load
 
+source <(gh completion -s zsh)
 source .zsh_plugins.zsh

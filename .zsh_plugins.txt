@@ -1,5 +1,3 @@
-
-
 # external plugins
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
@@ -14,3 +12,4 @@ ohmyzsh/ohmyzsh path:plugins/command-not-found
 ohmyzsh/ohmyzsh path:plugins/common-aliases
 ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
 ohmyzsh/ohmyzsh path:plugins/sudo
+ohmyzsh/ohmyzsh path:plugins/gh
