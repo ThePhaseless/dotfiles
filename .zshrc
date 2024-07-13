@@ -84,16 +84,17 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [ -z "$TMUX" ]; then
 
   # Check if stow
-  if ! command -v stow -V &> /dev/null; then
-    echo "tmux is not installed!"
-  else
+  if command -v stow &> /dev/null; then
     dotfiles_path=$HOME/.dotfiles
+    echo "Updating dotfiles..."
     git -C $dotfiles_path pull
-    stow -t "$HOME" -d $dotfiles_path
+    stow -t "$HOME" -d $dotfiles_path .
+  else
+    echo "stow is not installed!"
   fi
 
   # Check if tmux is installed
-  if ! command -v tmux -V &> /dev/null; then
+  if ! command -v tmux &> /dev/null; then
     echo "tmux is not installed!"
   fi
 
@@ -110,6 +111,7 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
     ln -s -f tmux_path/.tmux.conf
     cp tmux_path/.tmux.conf.local .
   else
+    echo "Updating oh-my-tmux..."
     git -C tmux_path pull
   fi
 
@@ -119,8 +121,12 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
     git clone --depth 1 https://github.com/junegunn/fzf.git fzf_path
     fzf_path/install --all
   else
-    git -C fzf_path pull
-    fzf_path/install --bin
+    echo "Updating fzf..."
+    UPDATE_LOG=$(git -C fzf_path pull)
+    echo $UPDATE_LOG
+    if ! echo $UPDATE_LOG | grep -q "Already up to date."; then
+        fzf_path/install --bin
+    fi
   fi
 
   [ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
@@ -128,7 +134,6 @@ if command -v tmux &> /dev/null && [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] &&
 
   exec $(tmux attach || tmux new)
 
-  clear
 fi
 
 
