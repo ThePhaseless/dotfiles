@@ -91,7 +91,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
 
   # Install antidote
   if [[ ! -d "${HOME}/.antidote" ]]; then
-    git clone --depth=1 https://github.com/mattmc3/antidote.git "${ZDOTDIR:-~}"/.antidote
+    git clone --depth=1 https://github.com/mattmc3/antidote.git "${HOME}"/.antidote
   fi
 
   # Launch tmux
