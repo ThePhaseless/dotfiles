@@ -1,0 +1,16 @@
+
+
+# external plugins
+zsh-users/zsh-completions
+zsh-users/zsh-autosuggestions
+marlonrichert/zsh-autocomplete
+
+# ohmyzsh
+getantidote/use-omz
+ohmyzsh/ohmyzsh path:lib
+
+ohmyzsh/ohmyzsh path:plugins/git
+ohmyzsh/ohmyzsh path:plugins/command-not-found
+ohmyzsh/ohmyzsh path:plugins/common-aliases
+ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
+ohmyzsh/ohmyzsh path:plugins/sudo
