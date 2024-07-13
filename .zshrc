@@ -1,3 +1,4 @@
+#!/usr/bin/zsh
 # Load zsh-autocomplete
 # skip_global_compinit=1z
 
@@ -53,7 +54,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   if [ ! -d "$tmux_path" ]; then
     git clone https://github.com/gpakosz/.tmux.git "$tmux_path"
     ln -s -f "$tmux_path"/.tmux.conf .
-    if [ ! -f "$HOME/.tmux.conf.local" ]
+    if [ ! -f "$HOME/.tmux.conf.local" ];then
       cp "$tmux_path"/.tmux.conf.local .
     fi
   else
