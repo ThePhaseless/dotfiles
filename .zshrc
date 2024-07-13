@@ -32,8 +32,11 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   dotfiles_path=$HOME/.dotfiles
   if command -v stow &>/dev/null; then
     echo "Updating dotfiles..."
-    git -C "$dotfiles_path" pull
-    stow -t "$HOME" -d "$dotfiles_path" .
+    UPDATE_LOG=$(git -C "$dotfiles_path" pull)
+    echo $UPDATE_LOG
+    if ! echo "$UPDATE_LOG" | grep -q "Already up to date."; then
+      stow -t "$HOME" -d "$dotfiles_path" .
+    fi
   else
     echo "stow is not installed!"
   fi
@@ -54,12 +57,15 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   if [ ! -d "$tmux_path" ]; then
     git clone https://github.com/gpakosz/.tmux.git "$tmux_path"
     ln -s -f "$tmux_path"/.tmux.conf .
-    if [ ! -f "$HOME/.tmux.conf.local" ];then
+    if [ ! -f "$HOME/.tmux.conf.local" ]; then
       cp "$tmux_path"/.tmux.conf.local .
     fi
   else
-    echo "Updating oh-my-tmux..."
-    git -C "$tmux_path" pull
+    (
+      (
+        git -C "$tmux_path" pull >/dev/null
+      ) &
+    )
   fi
 
   # Check for zoxide
@@ -74,12 +80,13 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
     git clone --depth 1 https://github.com/junegunn/fzf.git "$fzf_path"
     "$fzf_path"/install --all
   else
-    echo "Updating fzf..."
-    UPDATE_LOG=$(git -C "$fzf_path" pull)
-    echo "$UPDATE_LOG"
-    if ! echo "$UPDATE_LOG" | grep -q "Already up to date."; then
-      "$fzf_path"/install --bin
-    fi
+    (
+      (
+        if ! git -C "$fzf_path" pull | grep -q "Already up to date."; then
+          "$fzf_path"/install --bin
+        fi
+      ) &
+    )
   fi
 
   # Install antidote
