@@ -5,17 +5,14 @@
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-autoload -Uz zrecompile
-autoload -Uz compinit
-zstyle ':omz:update' mode auto # update automatically without asking
+autoload -Uz zrecompile         # Fix unicode characters
+zstyle ':omz:update' mode auto  # update automatically without asking
 
-#COMPLETION_WAITING_DOTS="true"
+export COMPLETION_WAITING_DOTS="true"
 
-#HIST_STAMPS="dd/mm/yyyy"
+export HIST_STAMPS="dd/mm/yyyy"
 
 export ZSH_THEME="juanghurtado"
-
-# plugins=(git command-not-found common-aliases git-auto-fetch sudo zsh-autocomplete)
 
 # Enable Docker completions stacking
 zstyle ':completion:*:*:docker:*' option-stacking yes
@@ -23,9 +20,8 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 # set PATH so it includes user's private bin if it exists
 mkdir "$HOME"/.local/bin -p
-if [ -d "$HOME/.local/bin" ]; then
-  PATH="$HOME/.local/bin:$PATH"
-fi
+ PATH="$HOME/.local/bin:$PATH"
+
 
 if ! command -v tmux &>/dev/null;then
   echo "tmux not installed"
@@ -42,6 +38,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
     UPDATE_LOG=$(git -C "$dotfiles_path" pull)
     echo $UPDATE_LOG
     if ! echo "$UPDATE_LOG" | grep -q "Already up to date."; then
+      echo "dotfiles updated, running stow..."
       stow -t "$HOME" -d "$dotfiles_path" .
     fi
   else
@@ -51,12 +48,6 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   # Check for oh-my-zsh
   if [ ! -d "$ZSH" ]; then
     KEEP_ZSHRC=yes RUNZSH=no sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"
-  fi
-
-  # Check for tmux
-  if ! command -v tmux &>/dev/null; then
-    echo "tmux is not installed!"
-    return 1
   fi
 
   # Check for .oh-my-tmux
@@ -109,7 +100,9 @@ eval "$(zoxide init zsh)"
 [ -f ~/.fzf.zsh ] && source .fzf.zsh
 
 source "$HOME"/.antidote/antidote.zsh
-antidote load
 
-source <(gh completion -s zsh)
+[ ! -f ${fpath[1]}/_tailscale ] && tailscale completion zsh > "${fpath[1]}/_tailscale"
+[ ! -f ${fpath[1]}/_gh ] && gh completion -s zsh > "${fpath[1]}/_gh"
+
+antidote load
 source .zsh_plugins.zsh
