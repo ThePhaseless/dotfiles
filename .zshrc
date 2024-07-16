@@ -73,7 +73,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
 
   # Check for .fzf does not exist
   fzf_path=$HOME/.fzf
-  if [ ! -d "$fzf_path" ]; then
+  if [ ! -d "$fzf_path" ] || ! -f $HOME/.fzf.zsh; then
     echo "fzf not found, installing"
     git clone --depth 1 https://github.com/junegunn/fzf.git "$fzf_path"
     "$fzf_path"/install --all
@@ -97,7 +97,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
 fi
 
 eval "$(zoxide init zsh)"
-[ -f ~/.fzf.zsh ] && source .fzf.zsh
+[ -f $HOME/.fzf.zsh ] && source .fzf.zsh
 
 source "$HOME"/.antidote/antidote.zsh
 
@@ -105,4 +105,6 @@ source "$HOME"/.antidote/antidote.zsh
 [ ! -f ${fpath[1]}/_gh ] && gh completion -s zsh > "${fpath[1]}/_gh"
 
 antidote load
-source .zsh_plugins.zsh
+source $HOME/.zsh_plugins.zsh
+
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
