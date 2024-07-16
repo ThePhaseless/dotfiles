@@ -1,12 +1,12 @@
-#!/usr/bin/zsh
+#!/usr/bin/bash
 # Load zsh-autocomplete
 # skip_global_compinit=1z
 
 # Path to your Oh My Zsh installation.
 export ZSH="$HOME/.oh-my-zsh"
 
-autoload -Uz zrecompile         # Fix unicode characters
-zstyle ':omz:update' mode auto  # update automatically without asking
+autoload -Uz zrecompile        # Fix unicode characters
+zstyle ':omz:update' mode auto # update automatically without asking
 
 export COMPLETION_WAITING_DOTS="true"
 
@@ -20,10 +20,9 @@ zstyle ':completion:*:*:docker-*:*' option-stacking yes
 
 # set PATH so it includes user's private bin if it exists
 mkdir "$HOME"/.local/bin -p
- PATH="$HOME/.local/bin:$PATH"
+PATH="$HOME/.local/bin:$PATH"
 
-
-if ! command -v tmux &>/dev/null;then
+if ! command -v tmux &>/dev/null; then
   echo "tmux not installed"
   return 1
 fi
@@ -36,7 +35,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   if command -v stow &>/dev/null; then
     echo "Updating dotfiles..."
     UPDATE_LOG=$(git -C "$dotfiles_path" pull)
-    echo $UPDATE_LOG
+    echo "$UPDATE_LOG"
     if ! echo "$UPDATE_LOG" | grep -q "Already up to date."; then
       echo "dotfiles updated, running stow..."
       stow -t "$HOME" -d "$dotfiles_path" .
@@ -73,7 +72,7 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
 
   # Check for .fzf does not exist
   fzf_path=$HOME/.fzf
-  if [ ! -d "$fzf_path" ] || ! -f $HOME/.fzf.zsh; then
+  if [ ! -d "$fzf_path" ] || ! [ -f "$HOME"/.fzf.zsh ]; then
     echo "fzf not found, installing"
     git clone --depth 1 https://github.com/junegunn/fzf.git "$fzf_path"
     "$fzf_path"/install --all
@@ -92,19 +91,19 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
     git clone --depth=1 https://github.com/mattmc3/antidote.git "${HOME}"/.antidote
   fi
 
-  # Launch tmux
-  exec $(tmux attach || tmux new)
+  # Launch tmux if not in vscode
+  if [[ -z ${VSCODE_INJECTION+x} ]]; then
+    exec $(tmux attach || tmux new)
+  fi
 fi
 
 eval "$(zoxide init zsh)"
-[ -f $HOME/.fzf.zsh ] && source .fzf.zsh
+[ -f "$HOME"/.fzf.zsh ] && (source ~/.fzf.zsh || source "$HOME"/.fzf.zsh)
 
 source "$HOME"/.antidote/antidote.zsh
 
-[ ! -f ${fpath[1]}/_tailscale ] && tailscale completion zsh > "${fpath[1]}/_tailscale"
-[ ! -f ${fpath[1]}/_gh ] && gh completion -s zsh > "${fpath[1]}/_gh"
+[ ! -f "${fpath[1]}"/_tailscale ] && tailscale completion zsh >"${fpath[1]}/_tailscale"
+[ ! -f "${fpath[1]}"/_gh ] && gh completion -s zsh >"${fpath[1]}/_gh"
 
 antidote load
-source $HOME/.zsh_plugins.zsh
-
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh
+source "$HOME"/.zsh_plugins.zsh
