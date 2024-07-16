@@ -6,3 +6,6 @@
 	helper = !/usr/bin/gh auth git-credential
 [maintenance]
 	repo = /home/thephaseless/Repos/znap
+[user]
+	email = kukubaorch@gmail.com
+	name = Thephaseless
