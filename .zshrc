@@ -103,6 +103,7 @@ eval "$(zoxide init zsh)"
 source "$HOME"/.antidote/antidote.zsh
 
 completion_path="$HOME"/.oh-my-zsh/completions
+mkdir -p "$completion_path"
 [ ! -f "$completion_path"/_tailscale ] && tailscale completion zsh >"$completion_path/_tailscale"
 [ ! -f "$completion_path"/_gh ] && gh completion -s zsh >"$completion_path/_gh"
 
