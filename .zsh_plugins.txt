@@ -1,13 +1,17 @@
-# ohmyzsh
+# Oh My ZSH requirements
 getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
+# Oh My ZSH plugins
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/command-not-found
 ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
 ohmyzsh/ohmyzsh path:plugins/sudo
 
-# external plugins
+# External plugins
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 marlonrichert/zsh-autocomplete
+
+# Local plugins
+$HOME/.config/zsh/site-functions kind:fpath

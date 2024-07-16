@@ -91,6 +91,12 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
     git clone --depth=1 https://github.com/mattmc3/antidote.git "${HOME}"/.antidote
   fi
 
+  # Install custom completions
+  completion_path="$HOME"/.config/zsh/site-functions
+  mkdir -p "$completion_path"
+  [ ! -f "$completion_path"/_tailscale ] && tailscale completion zsh >"$completion_path/_tailscale"
+  [ ! -f "$completion_path"/_gh ] && gh completion -s zsh >"$completion_path/_gh"
+
   # Launch tmux if not in vscode
   if [[ -z ${VSCODE_INJECTION+x} ]]; then
     exec $(tmux attach || tmux new)
@@ -101,11 +107,6 @@ eval "$(zoxide init zsh)"
 [ -f "$HOME"/.fzf.zsh ] && (source ~/.fzf.zsh || source "$HOME"/.fzf.zsh)
 
 source "$HOME"/.antidote/antidote.zsh
-
-completion_path="$HOME"/.oh-my-zsh/completions
-mkdir -p "$completion_path"
-[ ! -f "$completion_path"/_tailscale ] && tailscale completion zsh >"$completion_path/_tailscale"
-[ ! -f "$completion_path"/_gh ] && gh completion -s zsh >"$completion_path/_gh"
-
 antidote load
+
 source "$HOME"/.zsh_plugins.zsh
