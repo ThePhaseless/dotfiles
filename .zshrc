@@ -94,9 +94,9 @@ if [ -n "$PS1" ] && [[ ! "$TERM" =~ screen ]] && [[ ! "$TERM" =~ tmux ]] && [[ -
   # Install custom completions
   completion_path="$HOME"/.config/zsh/site-functions
   mkdir -p "$completion_path"
-  [ ! -f "$completion_path"/_tailscale ] && tailscale completion zsh >"$completion_path/_tailscale"
-  [ ! -f "$completion_path"/_gh ] && gh completion -s zsh >"$completion_path/_gh"
-  [ ! -f "$completion_path"/_docker ] && docker completion zsh >"$completion_path/_docker"
+  [ ! -f "$completion_path"/_tailscale ] && command -v tailscale && tailscale completion zsh >"$completion_path/_tailscale"
+  [ ! -f "$completion_path"/_gh ] && command -v gh && gh completion -s zsh >"$completion_path/_gh"
+  [ ! -f "$completion_path"/_docker ] && command -v docker && docker completion zsh >"$completion_path/_docker"
 
   # Launch tmux if not in vscode
   if [[ -z ${VSCODE_INJECTION+x} ]]; then
