@@ -9,3 +9,5 @@
 [user]
 	email = kukubaorch@gmail.com
 	name = Thephaseless
+[safe]
+	directory = *
