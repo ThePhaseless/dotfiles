@@ -3,8 +3,9 @@ getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
 # Oh My ZSH plugins
-ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/command-not-found
+ohmyzsh/ohmyzsh path:plugins/docker
+ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
 ohmyzsh/ohmyzsh path:plugins/sudo
 ohmyzsh/ohmyzsh path:themes/juanghurtado.zsh-theme
