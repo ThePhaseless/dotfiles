@@ -20,7 +20,10 @@ update_github_repo() {
 
   # Check if repo already exists
   if [ -d "$output_path" ]; then
-    return "git -C "$output_path" pull --depth 1  >/dev/null 2>&1"
+    PULL_LOG=$(git -C "$output_path" status -uno)
+    if [[ "$PULL_LOG" == *"Already up to date."* ]]; then
+      return 1
+    fi
   else
     # Clone repo
     return "$(! git clone --depth 1 "$repo_url" "$output_path" >/dev/null 2>&1)"
@@ -80,9 +83,20 @@ update_github_repo "https://github.com/mattmc3/antidote.git"
 source "$HOME"/.antidote/antidote.zsh
 antidote load
 
+# KEYBINDS
+bindkey '^I' menu-select                                          # TAB
+bindkey -M menuselect '^I' menu-complete                          # TAB
+bindkey "$terminfo[kcbt]" menu-select                             # shift-tab
+bindkey -M menuselect "$terminfo[kcbt]" reverse-menu-complete     # shift-tab
+bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
+bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
+bindkey -M menuselect '^M' .accept-line
+
 # ZOXIDE
 if ! command -v zoxide &>/dev/null; then
   curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
 fi
 # # shellcheck source=/dev/null
 eval "$(zoxide init zsh)"
+
+clear
