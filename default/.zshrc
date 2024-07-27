@@ -1,4 +1,5 @@
 #!/usr/bin/zsh
+autoload -Uz zrecompile
 
 COMPLETIONS_PATH="$HOME"/.config/zsh/site-functions
 PATH="/root/.local/bin:$PATH"
@@ -20,7 +21,7 @@ update_github_repo() {
 
   # Check if repo already exists
   if [ -d "$output_path" ]; then
-    PULL_LOG=$(git -C "$output_path" status -uno)
+    PULL_LOG=$(git -C "$output_path" status --porcelain)
     if [[ "$PULL_LOG" == *"Already up to date."* ]]; then
       return 1
     fi
