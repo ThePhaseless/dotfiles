@@ -21,10 +21,13 @@ update_github_repo() {
 
   # Check if repo already exists
   if [ -d "$output_path" ]; then
-    PULL_LOG=$(git -C "$output_path" status --porcelain)
-    if [[ "$PULL_LOG" == *"Already up to date."* ]]; then
+    cd "$output_path" || return
+    LOCAL=$(git rev-parse @)
+    REMOTE=$(git rev-parse "@{u}")
+    if [[ "$LOCAL" == "$REMOTE" ]]; then
       return 1
     fi
+    git pull --depth 1 >/dev/null 2>&1
   else
     # Clone repo
     return "$(! git clone --depth 1 "$repo_url" "$output_path" >/dev/null 2>&1)"
@@ -49,7 +52,8 @@ if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then
       ln -s -f .tmux/.tmux.conf .
     fi
     # Run tmux
-    exec $(tmux attach || tmux new)
+    tmux attach || tmux new
+    exit
   else
     echo "tmux is not installed!"
   fi
