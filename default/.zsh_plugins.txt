@@ -8,7 +8,7 @@ ohmyzsh/ohmyzsh path:plugins/docker
 ohmyzsh/ohmyzsh path:plugins/git
 ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
 ohmyzsh/ohmyzsh path:plugins/sudo
-ohmyzsh/ohmyzsh path:themes/juanghurtado.zsh-theme
+ohmyzsh/ohmyzsh path:themes/duellj.zsh-theme
 
 
 # External plugins
