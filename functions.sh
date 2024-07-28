@@ -65,7 +65,7 @@ run_tmux() {
 
 install_stow() {
     if command -v stow &>/dev/null; then
-        if update_github_repo "https://github.com/thephaseless/dotfiles.git"; then
+        if update_github_repo "https://github.com/thephaseless/dotfiles.git" "$STOW_DIR"; then
             stow default
         fi
     else
