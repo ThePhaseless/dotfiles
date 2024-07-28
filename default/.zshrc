@@ -3,7 +3,7 @@
 autoload -Uz zrecompile
 
 PATH="/root/.local/bin:$PATH"
-export STOW_DIR="$HOME/.dotfiles"
+export STOW_DIR="$HOME/dotfiles"
 
 . $STOW_DIR/functions.sh
 
@@ -27,4 +27,5 @@ source "$HOME/.fzf.zsh"
 antidote load
 
 bind_keys
+clear
 install_zoxide
