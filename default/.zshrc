@@ -18,7 +18,7 @@ fi
   install_stow &
   install_fzf &
   install_antidote &
-)
+) >/dev/null 2>&1
 wait
 
 source "$HOME/.antidote/antidote.zsh"
