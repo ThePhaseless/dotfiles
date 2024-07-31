@@ -94,5 +94,4 @@ bind_keys() {
     bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete   # shift-tab
     bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
-    bindkey -M menuselect '^M' .accept-line
 }
