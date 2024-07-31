@@ -2,7 +2,7 @@
 # source ~/.fzf.zsh <- for preventing duplicates
 autoload -Uz zrecompile
 
-PATH="/root/.local/bin:$PATH"
+PATH="${HOME}/.local/bin:$PATH"
 export STOW_DIR="$HOME/dotfiles"
 
 . $STOW_DIR/functions.sh
