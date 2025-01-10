@@ -1,0 +1,24 @@
+# Initialization
+mattmc3/ez-compinit
+getantidote/use-omz
+ohmyzsh/ohmyzsh path:lib
+
+# Optimization
+QuarticCat/zsh-smartcache
+
+# Colors
+zpm-zsh/colors
+zpm-zsh/colorize
+chrissicool/zsh-256color
+
+# Utils
+hcgraf/zsh-sudo # Double esc to sudo
+toku-sa-n/zsh-dot-up # Use dots to go up in dir
+tom-auger/cmdtime # Show command time
+Freed-Wu/zsh-command-not-found # Apt suggestions
+zsh-users/zsh-completions
+zsh-users/zsh-autosuggestions
+marlonrichert/zsh-autocomplete
+
+# Theme
+raisedbyfinches/aloy
