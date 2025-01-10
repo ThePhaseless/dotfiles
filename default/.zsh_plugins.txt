@@ -1,20 +1,24 @@
-# Oh My ZSH requirements
+mattmc3/ez-compinit
 getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
-# Oh My ZSH plugins
-ohmyzsh/ohmyzsh path:plugins/command-not-found
-ohmyzsh/ohmyzsh path:plugins/docker
-ohmyzsh/ohmyzsh path:plugins/git
-ohmyzsh/ohmyzsh path:plugins/git-auto-fetch
-ohmyzsh/ohmyzsh path:plugins/sudo
-ohmyzsh/ohmyzsh path:themes/duellj.zsh-theme
+# Optimization
+qoomon/zsh-lazyload
+QuarticCat/zsh-smartcache
 
+# Colors
+zpm-zsh/colors
+zpm-zsh/colorize
+chrissicool/zsh-256color
 
-# External plugins
+# Utils
+hcgraf/zsh-sudo # Double esc to sudo
+toku-sa-n/zsh-dot-up # Use dots to go up in dir
+tom-auger/cmdtime # Show command time
+GeoLMg/apt-zsh-plugin # Command installer
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 marlonrichert/zsh-autocomplete
 
-# Local plugins
-$HOME/.config/zsh/site-functions kind:fpath
+# Theme
+raisedbyfinches/aloy

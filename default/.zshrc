@@ -1,9 +1,9 @@
 #!/usr/bin/zsh
-# source ~/.fzf.zsh <- for preventing duplicates
-autoload -Uz zrecompile
+export PATH="${HOME}/.local/bin:$PATH"
 
-PATH="${HOME}/.local/bin:$PATH"
-export STOW_DIR="$HOME/dotfiles"
+if [ -z "$STOW_DIR" ]; then
+  export STOW_DIR="$HOME/dotfiles"
+fi
 
 . $STOW_DIR/functions.sh
 
@@ -11,21 +11,15 @@ export STOW_DIR="$HOME/dotfiles"
 if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then
   run_tmux
 fi
+if [ -v "$TMUX" ]; then
+  bind_keys
+fi
 
-(
-  gen_completions "tailscale completion zsh" &
-  gen_completions "gh completion -s zsh" &
-  install_stow &
-  install_fzf &
-  install_antidote &
-) >/dev/null 2>&1
-wait
-
+install_antidote
 source "$HOME/.antidote/antidote.zsh"
-source "$HOME/.fzf.zsh"
 
 antidote load
 
-bind_keys
+[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh -
+
 clear
-install_zoxide

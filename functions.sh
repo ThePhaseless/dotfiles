@@ -19,9 +19,7 @@ update_github_repo() {
     local output_path=$2
 
     # Extract repo name
-    local repo_name=${repo_url%%.git}
-    repo_name=${repo_name##*/}
-    repo_name=${repo_name#\.}
+    local repo_name=$(basename "$1" .git)
 
     # Set default output path
     if [ -z "$output_path" ]; then
@@ -30,18 +28,11 @@ update_github_repo() {
 
     # Check if repo already exists
     if [ -d "$output_path" ]; then
-        git -C "$output_path" fetch --depth 1 origin main >/dev/null 2>&1
-        LOCAL=$(git -C "$output_path" rev-parse @)
-        REMOTE=$(git -C "$output_path" rev-parse "@{u}")
-        if [[ "$LOCAL" == "$REMOTE" ]]; then
-            return 1
-        fi
-        git pull -C "$output_path" --depth 1 >/dev/null 2>&1
+        git -C "$output_path" pull
     else
         # Clone repo
-        return "$(! git clone --depth 1 "$repo_url" "$output_path" >/dev/null 2>&1)"
+        git clone "$repo_url" "$output_path"
     fi
-    return 0
 }
 
 install_antidote() {
@@ -55,11 +46,9 @@ run_tmux() {
             ln -s -f .tmux/.tmux.conf .
         fi
         # Run tmux
-        tmux attach || tmux new
-        exit
+        exec (tmux attach || tmux new)
     else
         echo "tmux is not installed!"
-        return 1
     fi
 }
 
@@ -70,7 +59,6 @@ install_stow() {
         fi
     else
         echo "stow is not installed!"
-        return 1
     fi
 }
 
@@ -84,7 +72,7 @@ install_zoxide() {
     if ! command -v zoxide &>/dev/null; then
         curl -sSfL https://raw.githubusercontent.com/ajeetdsouza/zoxide/main/install.sh | sh
     fi
-    eval "$(zoxide init zsh)"
+    zoxide init zsh
 }
 
 bind_keys() {
