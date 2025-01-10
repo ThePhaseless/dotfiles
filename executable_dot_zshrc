@@ -24,8 +24,6 @@ init_antidote(){
 init_tmux(){
   if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then # If not in VS Code/Screen
     run_tmux
-  elif [ "$TERM_PROGRAM"="tmux" ] && [ "$(tmux display-message -p '#{window_index}')" = "0" ] && [ -f /var/run/motd.dynamic ]; then # If in TMUX
-    cat /var/run/motd.dynamic
   fi
 }
 
@@ -88,3 +86,7 @@ smartcache comp gh completion -s zsh
 smartcache comp chezmoi completion zsh
 
 clear
+
+if [ "$TERM_PROGRAM"="tmux" ] && [ "$(tmux display-message -p '#{window_index}')" = "0" ] && [ -f /var/run/motd.dynamic ]; then # If in TMUX
+  cat /var/run/motd.dynamic
+fi
