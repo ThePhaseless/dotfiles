@@ -1,9 +1,10 @@
 #!/usr/bin/zsh
-export PATH="${HOME}/.local/bin:$PATH"
 
 if [ -z "$STOW_DIR" ]; then
   export STOW_DIR="$HOME/dotfiles"
 fi
+
+git -C "$STOW_DIR" pull
 
 . $STOW_DIR/functions.sh
 
@@ -21,6 +22,7 @@ fi
 source "$HOME/.antidote/antidote.zsh"
 antidote load
 
-[ -f ~/.fzf.zsh ] && source ~/.fzf.zsh -
+smartcache comp docker completion zsh
+smartcache comp gh completion -s zsh
 
 clear
