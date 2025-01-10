@@ -2,22 +2,6 @@
 
 GITHUB_USERNAME="ThePhaseless"
 
-init_tmux
-
-# Initialization
-init_antidote &
-# init_chezmoi &
-wait
-
-# Completion
-smartcache comp docker completion zsh
-smartcache comp gh completion -s zsh
-smartcache comp chezmoi completion zsh
-
-clear
-
-return 0
-
 # Functions
 init_chezmoi(){
   if command -v chezmoi &>/dev/null; then
@@ -43,7 +27,6 @@ init_tmux(){
   fi
 }
 
-# Functions
 update_repo() {
     local repo_url=$1
     local output_path=$2
@@ -87,3 +70,20 @@ bind_keys() {
     bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
+
+# Config
+init_tmux
+
+# Initialization
+init_antidote &
+# init_chezmoi &
+wait
+
+# Completion
+smartcache comp docker completion zsh
+smartcache comp gh completion -s zsh
+smartcache comp chezmoi completion zsh
+
+clear
+
+return 0
