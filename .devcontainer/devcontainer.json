@@ -23,7 +23,7 @@
 			]
 		}
 	},
-	"postAttachCommand": "sudo sh -c \"$(curl -fsLS get.chezmoi.io)\" -- -b $HOME/.local/bin init --apply ThePhaseless && chezmoi apply"
+	"postAttachCommand": "sudo sh -c \"$(curl -fsLS get.chezmoi.io)\" -- -b $HOME/.local/bin init --apply ThePhaseless && /home/vscode/.local/bin/chezmoi apply"
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
 }
