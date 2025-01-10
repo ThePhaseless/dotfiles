@@ -24,8 +24,8 @@ init_antidote(){
 init_tmux(){
   if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then # If not in VS Code/Screen
     run_tmux
-  elif [[ -v "$TMUX" ]]; then # If in TMUX
-    bind_keys
+  elif [[ -v "$TMUX" ]] && [ "$(tmux display-message -p '#{window_index}')" = "0" ] && [ -f /var/run/motd.dynamic ]; then # If in TMUX
+    cat /var/run/motd.dynamic
   fi
 }
 
@@ -79,6 +79,8 @@ init_tmux
 # Initialization
 init_antidote
 init_chezmoi
+
+bind_keys
 
 # Completion
 smartcache comp docker completion zsh
