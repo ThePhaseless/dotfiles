@@ -31,7 +31,7 @@ update_github_repo() {
         git -C "$output_path" pull
     else
         # Clone repo
-        git clone "$repo_url" "$output_path"
+        git clone --depth=1 "$repo_url" "$output_path"
     fi
 }
 
@@ -49,22 +49,6 @@ run_tmux() {
         exec (tmux attach || tmux new)
     else
         echo "tmux is not installed!"
-    fi
-}
-
-install_stow() {
-    if command -v stow &>/dev/null; then
-        if update_github_repo "https://github.com/thephaseless/dotfiles.git" "$STOW_DIR"; then
-            stow default
-        fi
-    else
-        echo "stow is not installed!"
-    fi
-}
-
-install_fzf() {
-    if update_github_repo "https://github.com/junegunn/fzf.git"; then
-        "$HOME"/.fzf/install --all
     fi
 }
 
