@@ -2,6 +2,8 @@
 
 GITHUB_USERNAME="ThePhaseless"
 
+export PATH=$HOME/.local/bin:$PATH
+
 # Functions
 init_chezmoi(){
   if command -v chezmoi &>/dev/null; then
@@ -22,7 +24,7 @@ init_antidote(){
 init_tmux(){
   if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then # If not in VS Code/Screen
     run_tmux
-  elif [ -v "$TMUX" ]; then # If in TMUX
+  elif [[ -v "$TMUX" ]]; then # If in TMUX
     bind_keys
   fi
 }
@@ -49,12 +51,12 @@ update_repo() {
     fi
 }
 
-init_tmux() {
+run_tmux() {
     # Check if Tmux is installed
     if command -v tmux &>/dev/null; then
-        update_repo "https://github.com/tmux-plugins/tpm" "~/.tmux/plugins/tpm"
+        update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
         # Run tmux
-        exec tmux attach || exec tmux new
+        tmux attach || tmux new
         return 0
     else
         echo "tmux is not installed!"
@@ -75,9 +77,8 @@ bind_keys() {
 init_tmux
 
 # Initialization
-init_antidote &
-# init_chezmoi &
-wait
+init_antidote
+init_chezmoi
 
 # Completion
 smartcache comp docker completion zsh
@@ -85,5 +86,3 @@ smartcache comp gh completion -s zsh
 smartcache comp chezmoi completion zsh
 
 clear
-
-return 0
