@@ -57,7 +57,7 @@ run_tmux() {
         update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
         # Run tmux
         tmux attach || tmux new
-        return 0
+        exit
     else
         echo "tmux is not installed!"
         return 1
