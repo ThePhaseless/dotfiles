@@ -3,7 +3,6 @@ getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
 # Optimization
-qoomon/zsh-lazyload
 QuarticCat/zsh-smartcache
 
 # Colors
@@ -15,7 +14,7 @@ chrissicool/zsh-256color
 hcgraf/zsh-sudo # Double esc to sudo
 toku-sa-n/zsh-dot-up # Use dots to go up in dir
 tom-auger/cmdtime # Show command time
-GeoLMg/apt-zsh-plugin # Command installer
+Freed-Wu/zsh-command-not-found
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 marlonrichert/zsh-autocomplete
