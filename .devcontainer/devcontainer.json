@@ -8,8 +8,8 @@
 	},
 	// Features to add to the dev container. More info: https://containers.dev/features.
 	// "features": {},
+	"workspaceMount": "source=${localWorkspaceFolder},target=/home/vscode/.local/share/chezmoi,type=bind",
 	"workspaceFolder": "/home/vscode/.local/share/chezmoi",
-	"workspaceMount": "/home/vscode/.local/share/chezmoi",
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 	// Configure tool-specific properties.
