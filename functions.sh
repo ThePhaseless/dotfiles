@@ -20,6 +20,7 @@ update_github_repo() {
 
     # Extract repo name
     local repo_name=$(basename "$1" .git)
+    repo_name=${repo_name#.}
 
     # Set default output path
     if [ -z "$output_path" ]; then
@@ -42,7 +43,7 @@ install_antidote() {
 run_tmux() {
     # Check if Tmux is installed
     if command -v tmux &>/dev/null; then
-        if update_github_repo "https://github.com/gpakosz/.tmux.git"; then
+        if update_github_repo "`x`"; then
             ln -s -f .tmux/.tmux.conf .
         fi
         # Run tmux
