@@ -71,13 +71,12 @@ bind_keys() {
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
-# Config
-init_tmux
-
 # Initialization
-init_antidote
 init_chezmoi
+init_tmux
+init_antidote
 
+# Config
 bind_keys
 
 # Completion
