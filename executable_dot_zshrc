@@ -3,6 +3,7 @@
 GITHUB_USERNAME="ThePhaseless"
 
 export PATH=$HOME/.local/bin:$PATH
+export EDITOR=nano # Don't judge
 
 # Functions
 init_chezmoi(){
