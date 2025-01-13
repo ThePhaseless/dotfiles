@@ -84,6 +84,9 @@ bind_keys
 smartcache comp docker completion zsh
 smartcache comp gh completion -s zsh
 smartcache comp chezmoi completion zsh
+smartcache comp uv generate-shell-completion zsh
+smartcache comp uvx --generate-shell-completion zsh
+smartcache comp ng completion script
 
 clear
 
