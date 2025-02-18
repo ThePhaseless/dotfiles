@@ -58,8 +58,12 @@ run_tmux() {
         tmux attach || tmux new
         exit
     else
-        echo "tmux is not installed!"
-        return 1
+        if command -v sudo &>/dev/null; then
+            sudo apt install tmux -y --no-install-recommends --no-install-suggests
+            run_tmux
+        else
+            echo "Please install tmux"
+        fi
     fi
 }
 
@@ -81,7 +85,6 @@ init_antidote
 bind_keys
 
 # Completion
-smartcache comp docker completion zsh
 smartcache comp gh completion -s zsh
 smartcache comp chezmoi completion zsh
 smartcache comp uv generate-shell-completion zsh
@@ -91,7 +94,7 @@ smartcache comp ng completion script
 clear
 
 if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
-  if [ "$(tmux display-message -p '#{window_index}')" = "0" ] && [ -f /var/run/motd.dynamic ]; then
+  if [ "$(tmux display-message -p '#{window_index}')" = "1" ] && [ -f /var/run/motd.dynamic ]; then
     cat /var/run/motd.dynamic
   fi
 fi
