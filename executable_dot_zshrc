@@ -85,11 +85,11 @@ init_antidote
 bind_keys
 
 # Completion
-smartcache comp gh completion -s zsh
-smartcache comp chezmoi completion zsh
-smartcache comp uv generate-shell-completion zsh
-smartcache comp uvx --generate-shell-completion zsh
-smartcache comp ng completion script
+smartcache comp gh completion -s zsh 2>/dev/null
+smartcache comp chezmoi completion zsh 2>/dev/null
+smartcache comp uv generate-shell-completion zsh 2>/dev/null
+smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
+smartcache comp ng completion script zsh 2>/dev/null
 
 clear
 
