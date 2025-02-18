@@ -3,6 +3,9 @@ mattmc3/ez-compinit
 getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
+# OMZ Plugins
+ohmyzsh/ohmyzsh path:plugins/docker
+
 # Optimization
 QuarticCat/zsh-smartcache
 
