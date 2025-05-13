@@ -76,10 +76,19 @@ bind_keys() {
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
+activate_venv() {
+  if [[ -f "$HOME/.venv/bin/activate" ]]; then
+    source "$HOME/.venv/bin/activate"
+  else
+    echo "Virtual environment not found at .venv/bin/activate"
+  fi
+}
+
 # Initialization
 init_chezmoi
 init_tmux
 init_antidote
+activate_venv
 
 # Config
 bind_keys
