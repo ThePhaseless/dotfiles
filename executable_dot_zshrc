@@ -85,10 +85,16 @@ activate_venv() {
   fi
 }
 
+init_chezmoi && init_tmux && init_antidote && activate_venv
+export error_occurred=$?
 
+if [[ "$error_occurred" -eq 0  ]]; then
+  clear
+else
+  echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
+  rm ~/.zsh_plugins.zsh
+fi
 
-# Initialization
-error_occurred= init_chezmoi || init_tmux || init_antidote || activate_venv
 
 # Config
 bind_keys
