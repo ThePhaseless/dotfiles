@@ -13,7 +13,7 @@ init_chezmoi(){
   if command -v chezmoi &>/dev/null && [ -d $HOME/.local/share/chezmoi ]; then
     chezmoi update
   else
-    sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply $GITHUB_USERNAME
+    (cd $HOME && sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply $GITHUB_USERNAME)
   fi
 }
 
