@@ -1,12 +1,10 @@
 #!/usr/bin/zsh
-set -e
-
 GITHUB_USERNAME="ThePhaseless"
 
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
 
-if code -v bat &>/dev/null; then
+if command -v code &>/dev/null; then
   export EDITOR="code --wait"
 fi
 
@@ -84,23 +82,13 @@ bind_keys() {
 activate_venv() {
   if [[ -f "$HOME/.venv/bin/activate" ]]; then
     source "$HOME/.venv/bin/activate"
-  else
-    echo "Virtual environment not found at .venv/bin/activate"
   fi
 }
 
-# Error handling
-error_handler() {
-  echo "An error occurred. Skipping rest of the commands."
-}
 
-trap error_handler ERR
 
 # Initialization
-init_chezmoi
-init_tmux
-init_antidote
-activate_venv
+error_occurred= init_chezmoi || init_tmux || init_antidote || activate_venv
 
 # Config
 bind_keys
@@ -112,11 +100,15 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 
-clear
-
 if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
   reset
   if [ "$(tmux display-message -p '#{window_index}')" = "1" ] && [ -f /var/run/motd.dynamic ]; then
     cat /var/run/motd.dynamic
   fi
+fi
+
+if [[ "$error_occurred" -eq 0 ]]; then
+  clear
+else
+  echo "An error occurred during initialization. Please check the output above."
 fi
