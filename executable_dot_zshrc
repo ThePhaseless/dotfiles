@@ -1,4 +1,6 @@
 #!/usr/bin/zsh
+set -e
+
 GITHUB_USERNAME="ThePhaseless"
 
 export PATH=$HOME/.local/bin:$PATH
@@ -87,6 +89,13 @@ activate_venv() {
   fi
 }
 
+# Error handling
+error_handler() {
+  echo "An error occurred. Skipping rest of the commands."
+}
+
+trap error_handler ERR
+
 # Initialization
 init_chezmoi
 init_tmux
@@ -103,11 +112,7 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 
-if $?; then
-  clear
-else
-  echo "Errors occurred, skipping clean."
-fi
+clear
 
 if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
   reset
