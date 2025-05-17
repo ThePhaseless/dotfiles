@@ -86,7 +86,7 @@ activate_venv() {
 }
 
 init_chezmoi && init_tmux && init_antidote && activate_venv
-export error_occurred=$?
+error_occurred=$?
 
 if [[ "$error_occurred" -eq 0  ]]; then
   clear
