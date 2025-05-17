@@ -1,16 +1,19 @@
 #!/usr/bin/zsh
-
 GITHUB_USERNAME="ThePhaseless"
 
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
+
+if code -v bat &>/dev/null; then
+  export EDITOR="code --wait"
+fi
 
 # Functions
 init_chezmoi(){
   if command -v chezmoi &>/dev/null; then
     chezmoi update
   else
-    sh -c "$(curl -fsLS get.chezmoi.io)" -- -b $HOME/.local/bin init --apply $GITHUB_USERNAME
+    sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply $GITHUB_USERNAME
   fi
 }
 
@@ -100,7 +103,11 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 
-clear
+if $?; then
+  clear
+else
+  echo "Errors occurred, skipping clean."
+fi
 
 if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
   reset
