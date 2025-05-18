@@ -1,12 +1,9 @@
 #!/usr/bin/zsh
 GITHUB_USERNAME="ThePhaseless"
-export LANG="en_US"
-export LANGUAGE="en_US"
-export LC_ALL="en_US"
-
 
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
+
 
 if command -v code &>/dev/null; then
   export EDITOR="code --wait"
@@ -33,6 +30,20 @@ init_tmux(){
   if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then # If not in VS Code/Screen
     run_tmux
   fi
+}
+
+init_locale() {
+  # Check if en_US.utf-8 is generated
+  if ! locale -a | grep -q "en_US.utf-8"; then
+    if ! sudo locale-gen en_US.UTF-8; then
+      echo "Please generate the en_US.utf-8 locale"
+    fi
+  fi
+  # Set locale if not set to en_US.UTF-8
+  if  [[ "$LANG" != "en_US.UTF-8" ]]; then
+    sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 LANGUAGE=en_US.UTF-8
+  fi
+
 }
 
 update_repo() {
@@ -89,7 +100,7 @@ activate_venv() {
   fi
 }
 
-init_chezmoi && init_tmux && init_antidote && activate_venv
+init_locale && init_chezmoi && init_tmux && init_antidote && activate_venv
 error_occurred=$?
 
 if [[ "$error_occurred" -eq 0  ]]; then
@@ -98,7 +109,6 @@ else
   echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
   rm ~/.zsh_plugins.zsh
 fi
-
 
 # Config
 bind_keys
@@ -110,15 +120,19 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 
-if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
-  reset
-  if [ "$(tmux display-message -p '#{window_index}')" = "1" ] && [ -f /var/run/motd.dynamic ]; then
-    cat /var/run/motd.dynamic
-  fi
-fi
-
 if [[ "$error_occurred" -eq 0 ]]; then
   clear
 else
   echo "An error occurred during initialization. Please check the output above."
+fi
+
+if  [ -f /var/run/motd.dynamic ]; then
+  if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
+    reset
+    if [ "$(tmux display-message -p '#{window_index}')" = "1" ]; then
+      cat /var/run/motd.dynamic
+    fi
+  else
+    cat /var/run/motd.dynamic
+  fi
 fi
