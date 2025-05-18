@@ -71,17 +71,18 @@ update_repo() {
 run_tmux() {
     # Check if Tmux is installed
     if command -v tmux &>/dev/null; then
-        update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
+        # Check if Tmux Plugin Manager is installed
+        if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+          # Install Tmux Plugin Manager
+          update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
+          $HOME/.tmux/plugins/tpm/bin/install_plugins
+        fi
         # Run tmux
         tmux attach || tmux new
         exit
     else
-        if command -v sudo &>/dev/null; then
-            sudo apt install tmux -y --no-install-recommends --no-install-suggests
-            run_tmux
-        else
-            echo "Please install tmux"
-        fi
+        echo "Tmux is not installed. Please install it to use this feature."
+        return 1
     fi
 }
 
