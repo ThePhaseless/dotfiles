@@ -1,5 +1,9 @@
 #!/usr/bin/zsh
 GITHUB_USERNAME="ThePhaseless"
+export LANG="en_US"
+export LANGUAGE="en_US"
+export LC_ALL="en_US"
+
 
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
