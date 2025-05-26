@@ -98,7 +98,7 @@ bind_keys() {
 
 activate_venv() {
   if [[ -f "$HOME/.venv/bin/activate" ]]; then
-    source "$HOME/.venv/bin/activate"
+    VIRTUAL_ENV_DISABLE_PROMPT=1 source "$HOME/.venv/bin/activate"
   fi
 }
 
