@@ -34,7 +34,7 @@ init_tmux(){
 
 init_locale() {
   # Check if en_US.utf-8 is generated
-  if ! locale -a | grep -q "en_US\.(utf|UTF)?-8"; then
+  if ! locale -a | grep -qE "en_US\.(utf|UTF)-?8"; then
     if ! sudo locale-gen en_US.UTF-8; then
       echo "Please generate the en_US.utf-8 locale"
     fi
