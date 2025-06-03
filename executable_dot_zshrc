@@ -4,6 +4,9 @@ GITHUB_USERNAME="ThePhaseless"
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
 
+if [ ! -f $HOME/.profile ]; then
+  source "$HOME/.profile"
+fi
 
 if command -v code &>/dev/null; then
   export EDITOR="code --wait"
@@ -19,7 +22,7 @@ init_chezmoi(){
 }
 
 init_antidote(){
-  if [ ! -f ~/.antidote/antidote.zsh ]; then
+  if [ ! -f "$HOME/.antidote/antidote.zsh" ]; then
     update_repo "https://github.com/mattmc3/antidote.git"
   fi
   source "$HOME/.antidote/antidote.zsh"
@@ -109,7 +112,7 @@ if [[ "$error_occurred" -eq 0  ]]; then
   clear
 else
   echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
-  rm ~/.zsh_plugins.zsh
+  rm "$HOME/.zsh_plugins.zsh"
 fi
 
 # Config
