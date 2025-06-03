@@ -4,7 +4,7 @@ GITHUB_USERNAME="ThePhaseless"
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
 
-if [ ! -f $HOME/.profile ]; then
+if [ -f "$HOME/.profile" ]; then
   source "$HOME/.profile"
 fi
 
