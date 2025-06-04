@@ -43,7 +43,7 @@ init_locale() {
     fi
   fi
   # Set locale if not set to en_US.UTF-8
-  if ! grep -qE "en_US\.(utf|UTF)-?8" <<< "$LOCALE"; then
+  if ! echo "$LANG" | grep -qE "en_US\.(utf|UTF)-?8"; then
     sudo update-locale LANG=en_US.UTF-8 LC_ALL=en_US.UTF-8 LANGUAGE=en_US.UTF-8
     export LANG=en_US.utf8
   fi
