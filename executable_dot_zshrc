@@ -34,7 +34,7 @@ init_antidote(){
 }
 
 init_tmux(){
-  if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ]; then # If not in VS Code/Screen
+  if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ] && [ -z "$VSCODE_INJECTION"]; then # If not in VS Code/Screen
     run_tmux
   fi
 }
