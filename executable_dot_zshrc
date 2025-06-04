@@ -12,6 +12,10 @@ if command -v code &>/dev/null; then
   export EDITOR="code --wait"
 fi
 
+if ! [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
+  return 0
+fi
+
 # Functions
 init_chezmoi(){
   if command -v chezmoi &>/dev/null && [ -d $HOME/.local/share/chezmoi ]; then
