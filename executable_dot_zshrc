@@ -4,10 +4,6 @@ GITHUB_USERNAME="ThePhaseless"
 export PATH=$HOME/.local/bin:$PATH
 export EDITOR=nano # Don't judge
 
-if [ -f "$HOME/.profile" ]; then
-  source "$HOME/.profile"
-fi
-
 if command -v code &>/dev/null; then
   export EDITOR="code --wait"
 fi
@@ -111,7 +107,13 @@ activate_venv() {
   fi
 }
 
-init_locale && init_chezmoi && init_tmux && init_antidote && activate_venv
+source_profile() {
+  if [ -f "$HOME/.profile" ]; then
+    source "$HOME/.profile"
+  fi
+}
+
+init_locale && init_chezmoi && init_tmux && init_antidote && activate_venv && source_profile
 error_occurred=$?
 
 if [[ "$error_occurred" -eq 0  ]]; then
