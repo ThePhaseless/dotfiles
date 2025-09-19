@@ -11,13 +11,12 @@ else
   export EDITOR="nano"
 fi
 
-
 if ! [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
   return 0
 fi
 
 # Functions
-init_chezmoi(){
+init_chezmoi() {
   if command -v chezmoi &>/dev/null && [ -d $HOME/.local/share/chezmoi ]; then
     chezmoi update
   else
@@ -25,7 +24,7 @@ init_chezmoi(){
   fi
 }
 
-init_antidote(){
+init_antidote() {
   if [ ! -f "$HOME/.antidote/antidote.zsh" ]; then
     update_repo "https://github.com/mattmc3/antidote.git"
   fi
@@ -33,7 +32,7 @@ init_antidote(){
   antidote load
 }
 
-init_tmux(){
+init_tmux() {
   if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ] && [ -z "$VSCODE_INJECTION"]; then # If not in VS Code/Screen
     run_tmux
   fi
@@ -53,49 +52,49 @@ init_locale() {
 }
 
 update_repo() {
-    local repo_url=$1
-    local output_path=$2
+  local repo_url=$1
+  local output_path=$2
 
-    # Extract repo name
-    local repo_name=$(basename "$1" .git)
-    repo_name=${repo_name#.}
+  # Extract repo name
+  local repo_name=$(basename "$1" .git)
+  repo_name=${repo_name#.}
 
-    # Set default output path
-    if [ -z "$output_path" ]; then
-        output_path=$HOME/.${repo_name}
-    fi
+  # Set default output path
+  if [ -z "$output_path" ]; then
+    output_path=$HOME/.${repo_name}
+  fi
 
-    # Check if repo already exists
-    if [ -d "$output_path" ]; then
-        git -qC "$output_path" pull
-    else
-        # Clone repo
-        git clone --depth=1 "$repo_url" "$output_path"
-    fi
+  # Check if repo already exists
+  if [ -d "$output_path" ]; then
+    git -qC "$output_path" pull
+  else
+    # Clone repo
+    git clone --depth=1 "$repo_url" "$output_path"
+  fi
 }
 
 run_tmux() {
-    # Check if Tmux is installed
-    if command -v tmux &>/dev/null; then
-        # Check if Tmux Plugin Manager is installed
-        if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-          # Install Tmux Plugin Manager
-          update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
-          $HOME/.tmux/plugins/tpm/bin/install_plugins
-        fi
-        # Run tmux
-        tmux attach || tmux new
-        exit
+  # Check if Tmux is installed
+  if command -v tmux &>/dev/null; then
+    # Check if Tmux Plugin Manager is installed
+    if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
+      # Install Tmux Plugin Manager
+      update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
+      $HOME/.tmux/plugins/tpm/bin/install_plugins
     fi
+    # Run tmux
+    tmux attach || tmux new
+    exit
+  fi
 }
 
 bind_keys() {
-    bindkey '^I' menu-select                                          # TAB
-    bindkey -M menuselect '^I' menu-complete                          # TAB
-    bindkey "${terminfo[kcbt]}" menu-select                           # shift-tab
-    bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete   # shift-tab
-    bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
-    bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
+  bindkey '^I' menu-select                                          # TAB
+  bindkey -M menuselect '^I' menu-complete                          # TAB
+  bindkey "${terminfo[kcbt]}" menu-select                           # shift-tab
+  bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete   # shift-tab
+  bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
+  bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
 activate_venv() {
@@ -110,10 +109,16 @@ source_profile() {
   fi
 }
 
-init_locale && init_chezmoi && init_tmux && init_antidote && activate_venv && source_profile
+init_locale &&
+  init_chezmoi &&
+  init_tmux &&
+  init_antidote &&
+  activate_venv &&
+  source_profile
+
 error_occurred=$?
 
-if [[ "$error_occurred" -eq 0  ]]; then
+if [[ $error_occurred -eq 0 ]]; then
   clear
 else
   echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
@@ -129,15 +134,16 @@ smartcache comp chezmoi completion zsh 2>/dev/null
 smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
+smartcache eval zoxide init zsh --cmd cd
 
-if [[ "$error_occurred" -eq 0 ]]; then
+if [[ $error_occurred -eq 0 ]]; then
   clear
 else
   echo "An error occurred during initialization. Please check the output above."
 fi
 
-if  [ -f /var/run/motd.dynamic ]; then
-  if [[ "$TERM_PROGRAM" == "tmux" ]]; then # If in TMUX
+if [ -f /var/run/motd.dynamic ]; then
+  if [[ $TERM_PROGRAM == "tmux" ]]; then # If in TMUX
     reset
     if [ "$(tmux display-message -p '#{window_index}')" = "1" ]; then
       cat /var/run/motd.dynamic
