@@ -86,9 +86,6 @@ run_tmux() {
         # Run tmux
         tmux attach || tmux new
         exit
-    else
-        echo "Tmux is not installed. Please install it to use this feature."
-        return 1
     fi
 }
 
