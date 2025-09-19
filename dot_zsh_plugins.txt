@@ -22,6 +22,7 @@ Freed-Wu/zsh-command-not-found # Apt suggestions
 zsh-users/zsh-completions
 zsh-users/zsh-autosuggestions
 marlonrichert/zsh-autocomplete
+zdharma-continuum/fast-syntax-highlighting kind:defer
 
 # Theme
 raisedbyfinches/aloy
