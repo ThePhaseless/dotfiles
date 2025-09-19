@@ -2,11 +2,15 @@
 GITHUB_USERNAME="ThePhaseless"
 
 export PATH=$HOME/.local/bin:$PATH
-export EDITOR=nano # Don't judge
 
-if command -v code &>/dev/null; then
+if command -v zed &>/dev/null; then
+  export EDITOR="zed --wait"
+elif command -v code &>/dev/null; then
   export EDITOR="code --wait"
+else
+  export EDITOR="nano"
 fi
+
 
 if ! [ -z "$INTELLIJ_ENVIRONMENT_READER" ]; then
   return 0
