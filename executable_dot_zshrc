@@ -67,7 +67,7 @@ update_repo() {
 
     # Check if repo already exists
     if [ -d "$output_path" ]; then
-        git -C "$output_path" pull
+        git -qC "$output_path" pull
     else
         # Clone repo
         git clone --depth=1 "$repo_url" "$output_path"
