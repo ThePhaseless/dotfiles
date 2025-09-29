@@ -136,7 +136,7 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 smartcache eval zoxide init zsh --cmd cd
-smartcache eval direnv hook bash
+smartcache eval direnv hook zsh
 
 if [[ $error_occurred -eq 0 ]]; then
     clear
