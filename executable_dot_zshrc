@@ -111,11 +111,11 @@ source_profile() {
 }
 
 init_locale &&
-    init_chezmoi &&
-    init_tmux &&
-    init_antidote &&
-    activate_venv &&
-    source_profile
+init_chezmoi &&
+init_tmux &&
+init_antidote &&
+activate_venv &&
+source_profile
 
 error_occurred=$?
 
@@ -136,6 +136,7 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 smartcache eval zoxide init zsh --cmd cd
+smartcache eval direnv hook bash
 
 if [[ $error_occurred -eq 0 ]]; then
     clear
