@@ -135,8 +135,8 @@ smartcache comp chezmoi completion zsh 2>/dev/null
 smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
-smartcache eval zoxide init zsh --cmd cd
-smartcache eval direnv hook zsh
+smartcache eval zoxide init zsh --cmd cd 2>/dev/null
+smartcache eval direnv hook zsh 2>/dev/null
 
 if [[ $error_occurred -eq 0 ]]; then
     clear
