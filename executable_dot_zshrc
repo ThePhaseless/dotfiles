@@ -104,18 +104,12 @@ activate_venv() {
     fi
 }
 
-source_profile() {
-    if [ -f "$HOME/.profile" ]; then
-        source "$HOME/.profile"
-    fi
-}
 
 init_locale &&
 init_chezmoi &&
 init_tmux &&
 init_antidote &&
-activate_venv &&
-source_profile
+activate_venv
 
 error_occurred=$?
 
