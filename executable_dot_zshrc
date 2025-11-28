@@ -12,7 +12,7 @@ else
     export EDITOR="nano"
 fi
 
-if [ -n "$INTELLIJ_ENVIRONMENT_READER" || -n "$VSCODE_RESOLVING_ENVIRONMENT" ]; then
+if [[ -n "$INTELLIJ_ENVIRONMENT_READER" || -n "$VSCODE_RESOLVING_ENVIRONMENT" ]]; then
     return 0
 fi
 
