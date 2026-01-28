@@ -12,7 +12,7 @@ else
     export EDITOR="nano"
 fi
 
-if [[ -n "$INTELLIJ_ENVIRONMENT_READER" || -n "$VSCODE_RESOLVING_ENVIRONMENT" || -n "$ZED_TERM" ]]; then
+if [[ -n "$INTELLIJ_ENVIRONMENT_READER" || -n "$VSCODE_RESOLVING_ENVIRONMENT" ]]; then
     return 0
 fi
 
@@ -34,7 +34,7 @@ init_antidote() {
 }
 
 init_tmux() {
-    if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ] && [ -z "$VSCODE_INJECTION"]; then # If not in VS Code/Screen
+    if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ] && [ -z "$VSCODE_INJECTION"] && [ -z "$ZED_TERM"]; then # If not in VS Code/Zed/Screen
         run_tmux
     fi
 }
@@ -104,12 +104,11 @@ activate_venv() {
     fi
 }
 
-
 init_locale &&
-init_chezmoi &&
-init_tmux &&
-init_antidote &&
-activate_venv
+    init_chezmoi &&
+    init_tmux &&
+    init_antidote &&
+    activate_venv
 
 error_occurred=$?
 
