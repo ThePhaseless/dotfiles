@@ -4,6 +4,8 @@ GITHUB_USERNAME="ThePhaseless"
 export PATH=$HOME/.local/bin:$PATH
 export _ZO_EXCLUDE_DIRS="!(@(node_modules|dist))"
 
+[[ -f ~/.zprofile ]] && source ~/.zprofile
+
 if command -v zed &>/dev/null; then
     export EDITOR="zed --wait"
 elif command -v code &>/dev/null; then
