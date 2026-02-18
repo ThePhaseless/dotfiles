@@ -14,7 +14,7 @@ else
     export EDITOR="nano"
 fi
 
-if [[ -n "$INTELLIJ_ENVIRONMENT_READER" || -n "$VSCODE_RESOLVING_ENVIRONMENT" ]]; then
+if [[ -n $INTELLIJ_ENVIRONMENT_READER || -n $VSCODE_RESOLVING_ENVIRONMENT ]]; then
     return 0
 fi
 
@@ -130,8 +130,30 @@ smartcache comp chezmoi completion zsh 2>/dev/null
 smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
-smartcache eval zoxide init zsh --cmd cd 2>/dev/null
 smartcache eval direnv hook zsh 2>/dev/null
+martcache eval zoxide init zsh --no-cmd 2>/dev/null
+
+# Custom cd wrapper to suppress error if already in target directory
+function cd() {
+    __zoxide_z "$@"
+    local ret=$?
+
+    # If zoxide failed (ret != 0), check if we are already in the target
+    if [[ $ret -ne 0 ]]; then
+        local target
+        if [[ -z $@ ]]; then
+            target="$HOME"
+        else
+            target="$(zoxide query "$@" 2>/dev/null)"
+        fi
+
+        # If the intended target is the current directory, return success (0)
+        if [[ $target == "$PWD" ]]; then
+            return 0
+        fi
+    fi
+    return $ret
+}
 
 if [[ $error_occurred -eq 0 ]]; then
     clear
