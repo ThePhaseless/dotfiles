@@ -131,7 +131,7 @@ smartcache comp uv generate-shell-completion zsh 2>/dev/null
 smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 smartcache eval direnv hook zsh 2>/dev/null
-martcache eval zoxide init zsh --no-cmd 2>/dev/null
+smartcache eval zoxide init zsh --no-cmd 2>/dev/null
 
 # Custom cd wrapper to suppress error if already in target directory
 function cd() {
