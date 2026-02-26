@@ -11,16 +11,16 @@ QuarticCat/zsh-smartcache
 
 # Colors
 zpm-zsh/colors
-zpm-zsh/colorize
+zpm-zsh/colorize kind:defer
 chrissicool/zsh-256color
 
 # Utils
 hcgraf/zsh-sudo # Double esc to sudo
 toku-sa-n/zsh-dot-up # Use dots to go up in dir
 tom-auger/cmdtime # Show command time
-Freed-Wu/zsh-command-not-found # Apt suggestions
+Freed-Wu/zsh-command-not-found kind:defer
 zsh-users/zsh-completions
-zsh-users/zsh-autosuggestions
+zsh-users/zsh-autosuggestions kind:defer
 marlonrichert/zsh-autocomplete
 zdharma-continuum/fast-syntax-highlighting kind:defer
 

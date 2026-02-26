@@ -1,8 +1,13 @@
 #!/usr/bin/zsh
 GITHUB_USERNAME="ThePhaseless"
 
+# Disable Aloy "magic enter"
+ALOY_MAGICENTER=()
+bindkey '^M' accept-line
+
 export PATH=$HOME/.local/bin:$PATH
 export _ZO_EXCLUDE_DIRS="!(@(node_modules|dist))"
+export DISABLE_AUTO_UPDATE="true"
 
 [[ -f ~/.zprofile ]] && source ~/.zprofile
 
@@ -20,34 +25,45 @@ fi
 
 # Functions
 init_chezmoi() {
-    if command -v chezmoi &>/dev/null && [ -d $HOME/.local/share/chezmoi ]; then
-        chezmoi update
-    else
-        (cd $HOME && sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply $GITHUB_USERNAME)
+    if ! command -v chezmoi &>/dev/null; then
+        return
+    fi
+
+    # Only init if the repo doesn't exist; skip the synchronous update to save startup time
+    if [ ! -d "$HOME/.local/share/chezmoi" ]; then
+        (cd "$HOME" && sh -c "$(curl -fsLS get.chezmoi.io/lb)" -- init --apply "$GITHUB_USERNAME")
     fi
 }
 
 init_antidote() {
-    if [ ! -f "$HOME/.antidote/antidote.zsh" ]; then
-        update_repo "https://github.com/mattmc3/antidote.git"
-    fi
-    source "$HOME/.antidote/antidote.zsh"
-    antidote load
-}
+    local antidote_dir="$HOME/.antidote"
+    local plugins_txt="$HOME/.zsh_plugins.txt"
+    local plugins_zsh="$HOME/.zsh_plugins.zsh"
 
-init_tmux() {
-    if [ -z "$TERM_PROGRAM" ] && [ -z "$STY" ] && [ -z "$VSCODE_INJECTION"] && [ -z "$ZED_TERM"]; then # If not in VS Code/Zed/Screen
-        run_tmux
+    # Install antidote if missing
+    if [ ! -d "$antidote_dir" ]; then
+        update_repo "https://github.com/mattmc3/antidote.git" "$antidote_dir"
     fi
+
+    # Lazy-load antidote and generate the static load file only when needed
+    if [[ ! -f "$plugins_zsh" ]] || [[ "$plugins_txt" -nt "$plugins_zsh" ]]; then
+        (
+            source "$antidote_dir/antidote.zsh"
+            antidote bundle < "$plugins_txt" > "$plugins_zsh"
+            zcompile "$plugins_zsh" # Pre-compile to binary for maximum speed
+        )
+    fi
+
+    # Source the ultra-fast static file
+    source "$plugins_zsh"
 }
 
 init_locale() {
     # Check if en_US.utf-8 is generated
     if ! locale -a | grep -qE "en_US\.(utf|UTF)-?8"; then
-        if ! locale-gen en_US.UTF-8; then
-            echo "Please run locale-gen en_US.UTF-8 to generate the missing locale"
-        fi
+        echo "Locale missing! Please run manually: sudo locale-gen en_US.UTF-8"
     fi
+
     # Set locale if not set to en_US.UTF-8
     if ! echo "$LANG" | grep -qE "en_US\.(utf|UTF)-?8"; then
         export LANG="en_US.UTF-8"
@@ -76,21 +92,6 @@ update_repo() {
     fi
 }
 
-run_tmux() {
-    # Check if Tmux is installed
-    if command -v tmux &>/dev/null; then
-        # Check if Tmux Plugin Manager is installed
-        if [ ! -d "$HOME/.tmux/plugins/tpm" ]; then
-            # Install Tmux Plugin Manager
-            update_repo "https://github.com/tmux-plugins/tpm" "$HOME/.tmux/plugins/tpm"
-            $HOME/.tmux/plugins/tpm/bin/install_plugins
-        fi
-        # Run tmux
-        tmux attach || tmux new
-        exit
-    fi
-}
-
 bind_keys() {
     bindkey '^I' menu-select                                          # TAB
     bindkey -M menuselect '^I' menu-complete                          # TAB
@@ -100,25 +101,16 @@ bind_keys() {
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
-activate_venv() {
-    if [[ -f "$HOME/.venv/bin/activate" ]]; then
-        VIRTUAL_ENV_DISABLE_PROMPT=1 source "$HOME/.venv/bin/activate"
-    fi
-}
-
-init_locale &&
-    init_chezmoi &&
-    init_tmux &&
-    init_antidote &&
-    activate_venv
+init_locale && \
+    init_chezmoi && \
+    init_antidote
 
 error_occurred=$?
 
-if [[ $error_occurred -eq 0 ]]; then
-    clear
-else
+# Only remove the cache on error, no clear screen yet
+if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
-    rm "$HOME/.zsh_plugins.zsh"
+    rm -f "$HOME/.zsh_plugins.zsh"
 fi
 
 # Config
@@ -137,7 +129,6 @@ smartcache eval zoxide init zsh --no-cmd 2>/dev/null
 function cd() {
     __zoxide_z "$@"
     local ret=$?
-
     # If zoxide failed (ret != 0), check if we are already in the target
     if [[ $ret -ne 0 ]]; then
         local target
@@ -155,19 +146,26 @@ function cd() {
     return $ret
 }
 
+# Final error check and single screen clear before MOTD
 if [[ $error_occurred -eq 0 ]]; then
-    clear
+    # clear
 else
     echo "An error occurred during initialization. Please check the output above."
 fi
 
 if [ -f /var/run/motd.dynamic ]; then
-    if [[ $TERM_PROGRAM == "tmux" ]]; then # If in TMUX
-        reset
-        if [ "$(tmux display-message -p '#{window_index}')" = "1" ]; then
-            cat /var/run/motd.dynamic
-        fi
-    else
-        cat /var/run/motd.dynamic
+    reset
+    cat /var/run/motd.dynamic
+fi
+
+## Start async chezmoi auto-updater (Rate-limited to once per hour)
+if command -v bash >/dev/null 2>&1 && [[ -f "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" ]]; then
+    local update_marker="/tmp/.chezmoi_last_update"
+
+    # Check if marker is missing OR older than 60 minutes
+    if [[ ! -f "$update_marker" ]] || [[ -z $(find "$update_marker" -mmin -60 2>/dev/null) ]]; then
+        touch "$update_marker" # Reset the clock immediately
+        # Run in background, log output for debugging, and disown
+        ( bash "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" > /tmp/chezmoi-update.log 2>&1 ) &|
     fi
 fi
