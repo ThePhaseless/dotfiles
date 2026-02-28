@@ -124,6 +124,10 @@ smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
 smartcache comp ng completion script zsh 2>/dev/null
 smartcache eval direnv hook zsh 2>/dev/null
 smartcache eval zoxide init zsh --no-cmd 2>/dev/null
+if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
+    smartcache eval /home/linuxbrew/.linuxbrew/bin/brew shellenv zsh 2>/dev/null
+fi
+
 
 # Custom cd wrapper to suppress error if already in target directory
 function cd() {
