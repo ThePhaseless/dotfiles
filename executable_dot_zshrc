@@ -117,13 +117,22 @@ fi
 bind_keys
 
 # Completion
-smartcache comp gh completion -s zsh 2>/dev/null
-smartcache comp chezmoi completion zsh 2>/dev/null
-smartcache comp uv generate-shell-completion zsh 2>/dev/null
-smartcache comp uvx --generate-shell-completion zsh 2>/dev/null
-smartcache comp ng completion script zsh 2>/dev/null
-smartcache eval direnv hook zsh 2>/dev/null
-smartcache eval zoxide init zsh --no-cmd 2>/dev/null
+function safe_smartcache() {
+    local subcmd="$1"; shift
+    local binary="$1"
+    if (( $+commands[$binary] )); then
+        smartcache "$subcmd" "$@" 2>/dev/null
+    fi
+}
+
+safe_smartcache comp gh completion -s zsh
+safe_smartcache comp chezmoi completion zsh
+safe_smartcache comp uv generate-shell-completion zsh
+safe_smartcache comp uvx --generate-shell-completion zsh
+safe_smartcache comp ng completion script zsh
+safe_smartcache eval direnv hook zsh
+safe_smartcache eval zoxide init zsh --no-cmd
+
 if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     export HOMEBREW_NO_ENV_HINTS=1
     export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
