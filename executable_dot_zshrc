@@ -40,13 +40,23 @@ init_antidote() {
     local plugins_txt="$HOME/.zsh_plugins.txt"
     local plugins_zsh="$HOME/.zsh_plugins.zsh"
 
+    # Nothing to do without a plugin list
+    if [[ ! -f "$plugins_txt" ]]; then
+        return 0
+    fi
+
     # Install antidote if missing
-    if [ ! -d "$antidote_dir" ]; then
-        update_repo "https://github.com/mattmc3/antidote.git" "$antidote_dir"
+    if [[ ! -d "$antidote_dir" ]]; then
+        update_repo "https://github.com/mattmc3/antidote.git" "$antidote_dir" || return 1
+    fi
+
+    if [[ ! -f "$antidote_dir/antidote.zsh" ]]; then
+        echo "antidote install appears broken, skipping plugins"
+        return 1
     fi
 
     # Lazy-load antidote and generate the static load file only when needed
-    if [[ ! -f "$plugins_zsh" ]] || [[ "$plugins_txt" -nt "$plugins_zsh" ]]; then
+    if [[ ! -s "$plugins_zsh" ]] || [[ "$plugins_txt" -nt "$plugins_zsh" ]]; then
         (
             source "$antidote_dir/antidote.zsh"
             antidote bundle < "$plugins_txt" > "$plugins_zsh"
@@ -54,8 +64,13 @@ init_antidote() {
         )
     fi
 
-    # Source the ultra-fast static file
-    source "$plugins_zsh"
+    # Source the static file if it exists and is non-empty
+    if [[ -s "$plugins_zsh" ]]; then
+        source "$plugins_zsh"
+    else
+        echo "antidote plugin file is empty or missing, skipping"
+        return 1
+    fi
 }
 
 init_locale() {
@@ -71,6 +86,11 @@ init_locale() {
 }
 
 update_repo() {
+    if ! command -v git &>/dev/null; then
+        echo "git not found, skipping repo update for $1"
+        return 1
+    fi
+
     local repo_url=$1
     local output_path=$2
 
@@ -101,11 +121,10 @@ bind_keys() {
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
-init_locale && \
-    init_chezmoi && \
-    init_antidote
-
-error_occurred=$?
+error_occurred=0
+init_locale || error_occurred=1
+init_chezmoi || error_occurred=1
+init_antidote || error_occurred=1
 
 # Only remove the cache on error, no clear screen yet
 if [[ $error_occurred -ne 0 ]]; then
@@ -120,6 +139,9 @@ bind_keys
 function safe_smartcache() {
     local subcmd="$1"; shift
     local binary="$1"
+    if ! (( $+functions[smartcache] )); then
+        return 0
+    fi
     if (( $+commands[$binary] )); then
         smartcache "$subcmd" "$@" 2>/dev/null
     fi
@@ -147,6 +169,10 @@ fi
 
 # Custom cd wrapper to suppress error if already in target directory
 function cd() {
+    if ! (( $+functions[__zoxide_z] )); then
+        builtin cd "$@"
+        return $?
+    fi
     __zoxide_z "$@"
     local ret=$?
     # If zoxide failed (ret != 0), check if we are already in the target
