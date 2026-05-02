@@ -154,6 +154,7 @@ safe_smartcache comp uvx --generate-shell-completion zsh
 safe_smartcache comp ng completion script zsh
 safe_smartcache eval direnv hook zsh
 safe_smartcache eval zoxide init zsh --no-cmd
+safe_smartcache eval mise activate zsh
 
 if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     export HOMEBREW_NO_ENV_HINTS=1
