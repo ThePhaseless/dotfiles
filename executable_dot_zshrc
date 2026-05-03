@@ -126,6 +126,9 @@ init_locale || error_occurred=1
 init_chezmoi || error_occurred=1
 init_antidote || error_occurred=1
 
+# Aloy rebinds Enter during theme init; restore plain submit after plugins load.
+bindkey -M main '^M' accept-line
+
 # Only remove the cache on error, no clear screen yet
 if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
