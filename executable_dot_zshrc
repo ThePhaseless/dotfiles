@@ -5,23 +5,19 @@ GITHUB_USERNAME="ThePhaseless"
 ALOY_MAGICENTER=()
 bindkey '^M' accept-line
 
-export PATH=$HOME/.local/bin:$PATH
+# zsh-autocomplete and other plugins need a valid TERM. Provide a safe default
+# when the terminal emulator did not set one (e.g., some IDE terminals).
+[[ -z "$TERM" ]] && export TERM=xterm-256color
+
 export _ZO_EXCLUDE_DIRS="!(@(node_modules|dist))"
 export DISABLE_AUTO_UPDATE="true"
-
-[[ -f ~/.zprofile ]] && source ~/.zprofile
-
-if command -v zed &>/dev/null; then
-    export EDITOR="zed --wait"
-elif command -v code &>/dev/null; then
-    export EDITOR="code --wait"
-else
-    export EDITOR="nano"
-fi
 
 if [[ -n $INTELLIJ_ENVIRONMENT_READER || -n $VSCODE_RESOLVING_ENVIRONMENT ]]; then
     return 0
 fi
+
+# Skip expensive interactive-only setup for non-interactive shells.
+[[ -o interactive ]] || return 0
 
 # Functions
 init_chezmoi() {
@@ -85,6 +81,24 @@ init_locale() {
     fi
 }
 
+init_docker() {
+    # WSL: Docker Desktop may not be running even if the docker binary is in
+    # PATH. The /var/run/docker.sock check is fast; fall back to docker --version
+    # only when the socket is missing. If docker is unavailable, skip the plugin
+    # silently and avoid shell startup errors.
+    if [[ ! -S /var/run/docker.sock ]] && ! command docker --version >/dev/null 2>&1; then
+        return 0
+    fi
+
+    local plugin="$HOME/.cache/antidote/github.com/ohmyzsh/ohmyzsh/plugins/docker/docker.plugin.zsh"
+    if [[ -f "$plugin" ]]; then
+        # Plugin provides aliases and uses 'docker completion zsh' to generate
+        # the completion file in the background.
+        source "$plugin"
+    fi
+}
+
+
 update_repo() {
     if ! command -v git &>/dev/null; then
         echo "git not found, skipping repo update for $1"
@@ -115,16 +129,20 @@ update_repo() {
 bind_keys() {
     bindkey '^I' menu-select                                          # TAB
     bindkey -M menuselect '^I' menu-complete                          # TAB
-    bindkey "${terminfo[kcbt]}" menu-select                           # shift-tab
-    bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete   # shift-tab
+    [[ -n "${terminfo[kcbt]}" ]] && bindkey "${terminfo[kcbt]}" menu-select                           # shift-tab
+    [[ -n "${terminfo[kcbt]}" ]] && bindkey -M menuselect "${terminfo[kcbt]}" reverse-menu-complete   # shift-tab
     bindkey -M menuselect '^[[D' .backward-char '^[OD' .backward-char # arrow left
     bindkey -M menuselect '^[[C' .forward-char '^[OC' .forward-char   # arrow right
 }
 
 error_occurred=0
+# Completion path for smartcache-generated and plugin-generated completions.
+fpath+=( "$HOME/.cache/zsh/completions" )
+
 init_locale || error_occurred=1
 init_chezmoi || error_occurred=1
 init_antidote || error_occurred=1
+init_docker || error_occurred=1
 
 # Aloy rebinds Enter during theme init; restore plain submit after plugins load.
 bindkey -M main '^M' accept-line
@@ -145,12 +163,13 @@ function safe_smartcache() {
     if ! (( $+functions[smartcache] )); then
         return 0
     fi
-    if (( $+commands[$binary] )); then
+    # Use command -v instead of $+commands to avoid building the full
+    # command hash table across a large PATH on every shell start.
+    if command -v "$binary" >/dev/null 2>&1; then
         smartcache "$subcmd" "$@" 2>/dev/null
     fi
 }
 
-safe_smartcache eval mise activate zsh
 safe_smartcache comp gh completion -s zsh
 safe_smartcache comp chezmoi completion zsh
 safe_smartcache comp uv generate-shell-completion zsh
@@ -158,6 +177,15 @@ safe_smartcache comp uvx --generate-shell-completion zsh
 safe_smartcache comp ng completion script zsh
 safe_smartcache eval direnv hook zsh
 safe_smartcache eval zoxide init zsh --no-cmd
+
+# Activate mise for zsh. The output is cached by smartcache; on cache hit it is
+# sourced instantly. The initial `_mise_hook` call is stripped to avoid the
+# expensive `mise hook-env` run on every shell start. The hooks are still
+# registered and will update the environment on the first prompt.
+# `env -i` gives the command a clean, deterministic environment so that the
+# cache does not keep invalidating itself because the parent shell already
+# loaded mise and exported MISE_* / __MISE_* variables.
+safe_smartcache eval env -i HOME=/home/orcho TERM=xterm-256color PATH=/usr/bin:/bin zsh -c 'source ~/.env; rehash; mise activate zsh | sed "/^_mise_hook$/d"'
 
 if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     export HOMEBREW_NO_ENV_HINTS=1

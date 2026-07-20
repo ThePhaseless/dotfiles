@@ -1,0 +1,13 @@
+# User environment variables
+# This file is tracked by Chezmoi. Edit it here or in the source repo.
+
+# Make this file idempotent when sourced multiple times.
+[ -n "${DOTENV_LOADED:-}" ] && return
+DOTENV_LOADED=1
+
+export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.bun/bin:$PATH"
+export EDITOR="{{ if lookPath "zed" }}zed --wait{{ else if lookPath "code" }}code --wait{{ else }}nano{{ end }}"
+export LANG="en_US.UTF-8"
+
+# Device-specific overrides and secrets (not tracked by Chezmoi).
+[ -f "$HOME/.env.local" ] && . "$HOME/.env.local"

@@ -1,0 +1,4 @@
+# ~/.zshenv: sourced by every zsh shell (login, non-login, interactive, non-interactive).
+# Load user environment variables from the editable ~/.env file.
+# Mise-managed tools are available via shims in PATH (set in ~/.env).
+[[ -f "$HOME/.env" ]] && source "$HOME/.env"

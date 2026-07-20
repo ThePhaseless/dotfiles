@@ -4,7 +4,7 @@ getantidote/use-omz
 ohmyzsh/ohmyzsh path:lib
 
 # OMZ Plugins
-ohmyzsh/ohmyzsh path:plugins/docker
+ohmyzsh/ohmyzsh path:plugins/docker kind:clone
 
 # Optimization
 QuarticCat/zsh-smartcache

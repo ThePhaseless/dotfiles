@@ -1,0 +1,10 @@
+# ~/.bash_profile: executed by bash for login shells.
+
+# Load the editable user environment file first.
+[ -f "$HOME/.env" ] && . "$HOME/.env"
+
+# Preserve the original ~/.profile behavior (it sources ~/.bashrc for bash).
+[ -f "$HOME/.profile" ] && . "$HOME/.profile"
+
+# Ensure non-interactive bash shells also load it.
+export BASH_ENV="$HOME/.env"
