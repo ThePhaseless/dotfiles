@@ -1,8 +1,15 @@
+{{- $gitEmail := promptStringOnce . "gitEmail" "Git user email" "kukubaorch@gmail.com" -}}
+{{- $gitName := promptStringOnce . "gitName" "Git user name" "ThePhaseless" -}}
+
 [git]
 autoAdd = true
 autoCommit = true
 autoPush = true
 commitMessageTemplate = {{`"{{ promptString \"Commit message\" }}"`}}
+
+[data]
+    gitEmail = {{ $gitEmail | quote }}
+    gitName = {{ $gitName | quote }}
 
 [edit]
 apply = true

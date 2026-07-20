@@ -1,5 +1,0 @@
-[credential]
-	helper = !/usr/bin/gh auth git-credential
-[user]
-	email = "{{ promptString \"Git user email\" \"kukubaorch@gmail.com\" }}"
-	name = "{{ promptString \"Git user name\" \"ThePhaseless\" }}"

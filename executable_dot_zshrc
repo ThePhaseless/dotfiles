@@ -16,10 +16,8 @@ if [[ -n $INTELLIJ_ENVIRONMENT_READER || -n $VSCODE_RESOLVING_ENVIRONMENT ]]; th
     return 0
 fi
 
-# Skip expensive interactive-only setup for non-interactive shells.
 [[ -o interactive ]] || return 0
 
-# Functions
 init_chezmoi() {
     if ! command -v chezmoi &>/dev/null; then
         return
@@ -36,12 +34,10 @@ init_antidote() {
     local plugins_txt="$HOME/.zsh_plugins.txt"
     local plugins_zsh="$HOME/.zsh_plugins.zsh"
 
-    # Nothing to do without a plugin list
     if [[ ! -f "$plugins_txt" ]]; then
         return 0
     fi
 
-    # Install antidote if missing
     if [[ ! -d "$antidote_dir" ]]; then
         update_repo "https://github.com/mattmc3/antidote.git" "$antidote_dir" || return 1
     fi
@@ -51,7 +47,6 @@ init_antidote() {
         return 1
     fi
 
-    # Lazy-load antidote and generate the static load file only when needed
     if [[ ! -s "$plugins_zsh" ]] || [[ "$plugins_txt" -nt "$plugins_zsh" ]]; then
         (
             source "$antidote_dir/antidote.zsh"
@@ -60,7 +55,6 @@ init_antidote() {
         )
     fi
 
-    # Source the static file if it exists and is non-empty
     if [[ -s "$plugins_zsh" ]]; then
         source "$plugins_zsh"
     else
@@ -70,12 +64,10 @@ init_antidote() {
 }
 
 init_locale() {
-    # Check if en_US.utf-8 is generated
     if ! locale -a | grep -qE "en_US\.(utf|UTF)-?8"; then
         echo "Locale missing! Please run manually: sudo locale-gen en_US.UTF-8"
     fi
 
-    # Set locale if not set to en_US.UTF-8
     if ! echo "$LANG" | grep -qE "en_US\.(utf|UTF)-?8"; then
         export LANG="en_US.UTF-8"
     fi
@@ -92,12 +84,9 @@ init_docker() {
 
     local plugin="$HOME/.cache/antidote/github.com/ohmyzsh/ohmyzsh/plugins/docker/docker.plugin.zsh"
     if [[ -f "$plugin" ]]; then
-        # Plugin provides aliases and uses 'docker completion zsh' to generate
-        # the completion file in the background.
         source "$plugin"
     fi
 }
-
 
 update_repo() {
     if ! command -v git &>/dev/null; then
@@ -107,21 +96,16 @@ update_repo() {
 
     local repo_url=$1
     local output_path=$2
-
-    # Extract repo name
     local repo_name=$(basename "$1" .git)
     repo_name=${repo_name#.}
 
-    # Set default output path
     if [ -z "$output_path" ]; then
         output_path=$HOME/.${repo_name}
     fi
 
-    # Check if repo already exists
     if [ -d "$output_path" ]; then
         git -qC "$output_path" pull
     else
-        # Clone repo
         git clone --depth=1 "$repo_url" "$output_path"
     fi
 }
@@ -136,7 +120,6 @@ bind_keys() {
 }
 
 error_occurred=0
-# Completion path for smartcache-generated and plugin-generated completions.
 fpath+=( "$HOME/.cache/zsh/completions" )
 
 init_locale || error_occurred=1
@@ -147,16 +130,13 @@ init_docker || error_occurred=1
 # Aloy rebinds Enter during theme init; restore plain submit after plugins load.
 bindkey -M main '^M' accept-line
 
-# Only remove the cache on error, no clear screen yet
 if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Clearing antidote cache... Please check the output above."
     rm -f "$HOME/.zsh_plugins.zsh"
 fi
 
-# Config
 bind_keys
 
-# Completion
 function safe_smartcache() {
     local subcmd="$1"; shift
     local binary="$1"
@@ -198,7 +178,6 @@ if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH:-}";
 fi
 
-
 # Custom cd wrapper to suppress error if already in target directory
 function cd() {
     if ! (( $+functions[__zoxide_z] )); then
@@ -207,7 +186,6 @@ function cd() {
     fi
     __zoxide_z "$@"
     local ret=$?
-    # If zoxide failed (ret != 0), check if we are already in the target
     if [[ $ret -ne 0 ]]; then
         local target
         if [[ -z $@ ]]; then
@@ -215,8 +193,6 @@ function cd() {
         else
             target="$(zoxide query "$@" 2>/dev/null)"
         fi
-
-        # If the intended target is the current directory, return success (0)
         if [[ $target == "$PWD" ]]; then
             return 0
         fi
@@ -224,10 +200,7 @@ function cd() {
     return $ret
 }
 
-# Final error check and single screen clear before MOTD
-if [[ $error_occurred -eq 0 ]]; then
-    # clear
-else
+if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Please check the output above."
 fi
 
@@ -240,10 +213,8 @@ fi
 if command -v bash >/dev/null 2>&1 && [[ -f "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" ]]; then
     local update_marker="/tmp/.chezmoi_last_update"
 
-    # Check if marker is missing OR older than 60 minutes
     if [[ ! -f "$update_marker" ]] || [[ -z $(find "$update_marker" -mmin -60 2>/dev/null) ]]; then
-        touch "$update_marker" # Reset the clock immediately
-        # Run in background, log output for debugging, and disown
+        touch "$update_marker"
         ( bash "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" > /tmp/chezmoi-update.log 2>&1 ) &|
     fi
 fi
