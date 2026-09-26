@@ -200,6 +200,41 @@ function cd() {
     return $ret
 }
 
+# Only deactivates venvs it activated itself, so a manually sourced venv sticks.
+# Paths are compared resolved because /home is a symlink to /var/home here.
+function autovenv() {
+    local dir=${PWD:A} venv=
+    while [[ -n $dir ]]; do
+        if [[ -f $dir/.venv/bin/activate ]]; then
+            venv=$dir/.venv
+            break
+        fi
+        dir=${dir%/*}
+    done
+
+    [[ -n ${VIRTUAL_ENV:-} && $venv == "${VIRTUAL_ENV:A}" ]] && return
+
+    if [[ -n ${_AUTOVENV:-} && ${VIRTUAL_ENV:-} == "$_AUTOVENV" ]] && (( $+functions[deactivate] )); then
+        deactivate
+        unset _AUTOVENV
+    fi
+
+    if [[ -n $venv && -z ${VIRTUAL_ENV:-} ]]; then
+        source "$venv/bin/activate"
+        _AUTOVENV=$VIRTUAL_ENV
+    fi
+}
+
+# VIRTUAL_ENV inherited from a parent process (IDE, agent) has no deactivate
+# function here and would block autovenv forever.
+if [[ -n ${VIRTUAL_ENV:-} ]] && ! (( $+functions[deactivate] )); then
+    path=( ${path:#$VIRTUAL_ENV/bin} )
+    unset VIRTUAL_ENV VIRTUAL_ENV_PROMPT
+fi
+autoload -Uz add-zsh-hook
+add-zsh-hook chpwd autovenv
+autovenv
+
 if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Please check the output above."
 fi
