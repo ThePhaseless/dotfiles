@@ -16,15 +16,14 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 
 | Setting | File | Loaded by |
 | --- | --- | --- |
-| Env var for every shell and script | `dot_env.tmpl` → `~/.env` | `.zshenv` (all zsh), `.bash_profile` + `BASH_ENV` (all bash, including non-interactive scripts), fish config |
+| Env var for every shell and script | `dot_env.tmpl` → `~/.env` | `.zshenv` (all zsh), `.bash_profile` + `BASH_ENV` (all bash, including non-interactive scripts) |
 | Machine-specific value or secret | `~/.env.local` (untracked) | sourced at the end of `~/.env` |
 | Interactive zsh only (prompt, completions, hooks, keybinds) | `executable_dot_zshrc` | interactive zsh |
 | zsh plugins | `dot_zsh_plugins.txt` | antidote, rebuilt when the file is newer than `~/.zsh_plugins.zsh` |
 
 Rules for `~/.env`:
 
-- Plain POSIX `sh`: bash, zsh and `sh` all source it.
-- One `export KEY="value"` per line. Fish reads it with a line parser (`dot_config/fish/config.fish`) that sets values literally, without running shell code or expanding `$VARS`.
+- Plain POSIX `sh`: bash, zsh and `sh` source it directly; any other shell can import it with `sh -c '. ~/.env; env -0'`.
 - `DOTENV_LOADED` (unexported) makes re-sourcing in the same shell a no-op; child shells load it fresh.
 - Secrets and API keys go only in `~/.env.local`, which chezmoi creates from `create_dot_env.local.tmpl` once and never tracks. Edit `~/.env.local` directly.
 
