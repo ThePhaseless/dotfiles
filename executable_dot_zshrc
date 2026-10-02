@@ -176,6 +176,17 @@ if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
     export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin${PATH+:$PATH}";
     [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";
     export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH:-}";
+elif [[ -f /opt/homebrew/bin/brew ]]; then
+    # Must run after /etc/zprofile: its path_helper puts /usr/bin ahead of anything ~/.env prepends,
+    # and Apple ships stale same-named tools there (screen 4.00.03, jq, openssl).
+    export HOMEBREW_NO_ENV_HINTS=1
+    export HOMEBREW_PREFIX="/opt/homebrew";
+    export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
+    export HOMEBREW_REPOSITORY="/opt/homebrew";
+    fpath[1,0]="/opt/homebrew/share/zsh/site-functions";
+    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
+    [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";
+    export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
 fi
 
 # Custom cd wrapper to suppress error if already in target directory

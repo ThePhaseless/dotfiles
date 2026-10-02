@@ -1,0 +1,5 @@
+# Needs screen 5+ for truecolor; macOS's bundled /usr/bin/screen is 4.00.03.
+truecolor on
+term screen-256color
+# ssh does not forward COLORTERM, so apps inside would otherwise fall back to 256 colors.
+setenv COLORTERM truecolor
