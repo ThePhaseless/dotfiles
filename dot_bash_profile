@@ -1,4 +1,6 @@
 # ~/.bash_profile: executed by bash for login shells.
 
+# Rebuild PATH even if inherited: /etc/profile (macOS path_helper) may have reordered it.
+unset DOTENV_PATH
 [ -f "$HOME/.env" ] && . "$HOME/.env"
 case $- in *i*) [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" ;; esac

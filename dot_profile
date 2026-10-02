@@ -1,3 +1,5 @@
 # ~/.profile: executed by sh (and tools that mimic it) for login shells.
 
+# Rebuild PATH even if inherited: /etc/profile (macOS path_helper) may have reordered it.
+unset DOTENV_PATH
 [ -f "$HOME/.env" ] && . "$HOME/.env"

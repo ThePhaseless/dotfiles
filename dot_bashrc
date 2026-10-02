@@ -2,3 +2,14 @@
 
 [ -f /etc/bashrc ] && . /etc/bashrc
 [ -f "$HOME/.env" ] && . "$HOME/.env"
+command -v mise >/dev/null 2>&1 && eval "$(mise activate bash)"
+
+# Appended after mise's prompt hook, which re-prepends its tools ahead of ~/.local/bin.
+if declare -F _dotenv_local_bin_first >/dev/null && [[ "${PROMPT_COMMAND[*]:-}" != *_dotenv_local_bin_first* ]]; then
+    if [[ "$(declare -p PROMPT_COMMAND 2>/dev/null)" == "declare -a"* ]]; then
+        PROMPT_COMMAND+=(_dotenv_local_bin_first)
+    else
+        PROMPT_COMMAND="${PROMPT_COMMAND:+$PROMPT_COMMAND;}_dotenv_local_bin_first"
+    fi
+    _dotenv_local_bin_first
+fi

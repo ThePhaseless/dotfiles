@@ -5,8 +5,7 @@
 [ -n "${DOTENV_LOADED:-}" ] && return
 DOTENV_LOADED=1
 
-# Moves an existing entry to the front instead of adding a duplicate: login shells
-# source this file again after /etc/profile (macOS path_helper) has reordered PATH.
+# Moves an existing entry to the front instead of adding a duplicate.
 _dotenv_path_prepend() {
     [ -d "$1" ] || return 0
     _dotenv_p=":$PATH:"
@@ -21,6 +20,29 @@ _dotenv_path_prepend() {
     PATH="$1${_dotenv_p:+:$_dotenv_p}"
 }
 
+# Puts ~/.local/bin right before mise's first dir: ahead of mise, still behind
+# whatever a parent put in front (venv, node_modules/.bin). .zshrc and .bashrc
+# rerun it after mise's prompt and cd hooks, which re-prepend mise's tools.
+_dotenv_local_bin_first() {
+    [ -d "$HOME/.local/bin" ] || return 0
+    _dotenv_rest="$PATH:" _dotenv_out= _dotenv_placed=
+    while [ -n "$_dotenv_rest" ]; do
+        _dotenv_e=${_dotenv_rest%%:*}
+        _dotenv_rest=${_dotenv_rest#*:}
+        if [ "$_dotenv_e" = "$HOME/.local/bin" ]; then
+            [ -n "$_dotenv_placed" ] && continue
+            _dotenv_placed=1
+        elif [ -z "$_dotenv_placed" ]; then
+            case $_dotenv_e in
+                "$HOME/.local/share/mise/"*) _dotenv_out="$_dotenv_out:$HOME/.local/bin" _dotenv_placed=1 ;;
+            esac
+        fi
+        _dotenv_out="$_dotenv_out:$_dotenv_e"
+    done
+    PATH=${_dotenv_out#:}
+    unset _dotenv_rest _dotenv_out _dotenv_placed _dotenv_e
+}
+
 for _dotenv_brew in /opt/homebrew /home/linuxbrew/.linuxbrew; do
     if [ -x "$_dotenv_brew/bin/brew" ]; then
         export HOMEBREW_PREFIX="$_dotenv_brew"
@@ -31,29 +53,47 @@ done
 [ -d "$HOME/.volta" ] && export VOLTA_HOME="$HOME/.volta"
 [ -d "$HOME/.bun" ] && export BUN_INSTALL="$HOME/.bun"
 
-# Lowest priority first: each entry is moved to the front in turn. Missing dirs are skipped.
-for _dotenv_dir in \
-    "$HOME/.local/share/JetBrains/Toolbox/scripts" \
-    "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" \
-    "$HOME/.lmstudio/bin" \
-    "$HOME/.duckdb/cli/latest" \
-    "$HOME/.opencode/bin" \
-    "$HOME/.devcontainers/bin" \
-    "$HOME/.docker/bin" \
-    "$HOME/.npm/global-modules/bin" \
-    "$HOME/dev/go/bin" \
-    "$HOME/go/bin" \
-    "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin}" \
-    "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin}" \
-    "$HOME/.volta/bin" \
-    "$HOME/.bun/bin" \
-    "$HOME/.cargo/bin" \
-    "$HOME/.local/share/mise/shims" \
-    "$HOME/.local/bin"
-do
-    _dotenv_path_prepend "$_dotenv_dir"
-done
-export PATH
+# Without it, `mise activate` in a terminal lets PATH edits made after activation
+# outrank mise's tools, so interactive shells resolve differently.
+export MISE_ACTIVATE_AGGRESSIVE=1
+
+# Built once per environment: child shells and scripts keep the PATH they inherit,
+# so a parent's venv or node_modules/.bin stays in front. Login shells unset
+# DOTENV_PATH to rebuild it after /etc/profile (macOS path_helper) reorders PATH.
+if [ -z "${DOTENV_PATH:-}" ]; then
+    # Lowest priority first: each entry is moved to the front in turn. Missing dirs are skipped.
+    for _dotenv_dir in \
+        "$HOME/.local/share/JetBrains/Toolbox/scripts" \
+        "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" \
+        "$HOME/.lmstudio/bin" \
+        "$HOME/.duckdb/cli/latest" \
+        "$HOME/.opencode/bin" \
+        "$HOME/.devcontainers/bin" \
+        "$HOME/.docker/bin" \
+        "$HOME/.npm/global-modules/bin" \
+        "$HOME/dev/go/bin" \
+        "$HOME/go/bin" \
+        "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin}" \
+        "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin}" \
+        "$HOME/.volta/bin" \
+        "$HOME/.bun/bin" \
+        "$HOME/.cargo/bin" \
+        "$HOME/.local/share/mise/shims" \
+        "$HOME/.local/bin"
+    do
+        _dotenv_path_prepend "$_dotenv_dir"
+    done
+
+    # Interactive bash/zsh run `mise activate` from their rc file (prompt and cd hooks).
+    # --force: a login shell rebuilding PATH may inherit mise's session and would
+    # otherwise skip re-adding tool paths after the reorder above.
+    case $-:${ZSH_VERSION:-}${BASH_VERSION:-} in
+        *i*:?*) ;;
+        *) command -v mise >/dev/null 2>&1 && eval "$(mise hook-env --force -s bash 2>/dev/null)" ;;
+    esac
+    _dotenv_local_bin_first
+    export PATH DOTENV_PATH=1
+fi
 
 export EDITOR="{{ if lookPath "zed" }}zed --wait{{ else if lookPath "code" }}code --wait{{ else }}nano{{ end }}"
 export LANG="en_US.UTF-8"

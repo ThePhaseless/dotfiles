@@ -25,9 +25,19 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 Rules for `~/.env`:
 
 - Plain POSIX `sh`: bash, zsh and `sh` source it directly; any other shell can import it with `sh -c '. ~/.env; env -0'`.
-- `DOTENV_LOADED` (unexported) makes re-sourcing in the same shell a no-op; child shells load it fresh. `.zprofile` unsets it to load `~/.env` again after `/etc/zprofile`, whose macOS `path_helper` puts system dirs back in front.
+- `DOTENV_LOADED` (unexported) makes re-sourcing in the same shell a no-op; child shells load it fresh.
 - Every PATH entry goes through `_dotenv_path_prepend` (also usable in `~/.env.local`): it skips missing dirs and moves an existing entry to the front, so re-sourcing never duplicates. The list in `dot_env.tmpl` runs lowest priority first.
 - Secrets and API keys go only in `~/.env.local`, which chezmoi creates from `create_dot_env.local.tmpl` once and never tracks. Edit `~/.env.local` directly.
+
+## PATH order and mise
+
+Every shell resolves in this order: whatever a parent put in front (venv, `node_modules/.bin`) → `~/.local/bin` → mise tools, Homebrew and the other `~` tool dirs → OS dirs.
+
+- PATH and mise are set up once per environment: `~/.env` exports `DOTENV_PATH=1`, and children keep the PATH they inherit. `.zprofile`, `.bash_profile` and `.profile` unset it to rebuild after `/etc/profile`, whose macOS `path_helper` puts system dirs back in front.
+- Interactive bash/zsh run `mise activate` from their rc file; any other shell that builds PATH gets `mise hook-env --force` from `~/.env`. `MISE_ACTIVATE_AGGRESSIVE=1` stops `activate` from ranking earlier PATH edits above mise's tools — mise does that only in a terminal.
+- `_dotenv_local_bin_first` moves `~/.local/bin` just ahead of mise's first dir; `.zshrc` and `.bashrc` rerun it after mise's prompt and cd hooks.
+- Tool order in `~/.config/mise/config.toml` is PATH order: a tool whose bin dir bundles another tool's binary (cursor-agent ships `node`) goes last.
+- `check-shells.sh` runs without a terminal. After changing PATH or mise setup, also open a real terminal and compare `command -v node python3` in zsh and bash, at the prompt and after `cd` into a project with a mise config.
 
 ## Target drift
 

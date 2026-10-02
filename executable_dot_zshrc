@@ -159,15 +159,22 @@ safe_smartcache eval direnv hook zsh
 safe_smartcache eval zoxide init zsh --no-cmd
 
 # Activate mise for zsh. The output is cached by smartcache; on cache hit it is
-# sourced instantly. The initial `_mise_hook` call is stripped to avoid the
-# expensive `mise hook-env` run on every shell start. The hooks are still
-# registered and will update the environment on the first prompt.
+# sourced instantly. The initial `_mise_hook --force` call stays: it applies
+# mise's environment before the first prompt, so `zsh -ic` matches the
+# non-interactive shells that get it from ~/.env.
 # `env -i` gives the command a clean, deterministic environment so that the
 # cache does not keep invalidating itself because the parent shell already
 # loaded mise and exported MISE_* / __MISE_* variables.
 # That clean PATH leaks into the output as `export PATH=` / `__MISE_ORIG_PATH=`
 # lines; they are stripped so the shell keeps its own PATH.
-safe_smartcache eval env -i HOME="$HOME" TERM=xterm-256color PATH=/usr/bin:/bin zsh -c 'source ~/.env; rehash; mise activate zsh | sed -E -e "/^_mise_hook( --force)?$/d" -e "/^export (__MISE_ORIG_)?PATH=/d"'
+safe_smartcache eval env -i HOME="$HOME" TERM=xterm-256color PATH=/usr/bin:/bin zsh -c 'source ~/.env; rehash; mise activate zsh | sed -E -e "/^export (__MISE_ORIG_)?PATH=/d"'
+
+# Registered after mise's prompt and cd hooks, which re-prepend its tools ahead of ~/.local/bin.
+if (( $+functions[_dotenv_local_bin_first] )); then
+    add-zsh-hook precmd _dotenv_local_bin_first
+    add-zsh-hook chpwd _dotenv_local_bin_first
+    _dotenv_local_bin_first
+fi
 
 [[ -n $HOMEBREW_PREFIX ]] && fpath[1,0]="$HOMEBREW_PREFIX/share/zsh/site-functions"
 
