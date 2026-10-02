@@ -11,8 +11,8 @@ cat > "$TMP/probe.sh" <<'EOF'
 # `command -v` returns shell functions (mise is one once activated); walk PATH for the binary instead.
 bin() { printf '%s\n' "$PATH" | tr : '\n' | while read -r d; do [ -x "$d/$1" ] && { printf '%s' "$d/$1"; break; }; done; }
 norm() { sed -E 's#^.*/mise/(installs|shims)/([^/]+).*#mise:\2#'; }
-# mise install dirs and antidote plugin bins exist only in interactive zsh by design.
-printf '%s\n' "$PATH" | tr : '\n' | grep -v '/mise/installs/' | grep -v '/.cache/antidote/' | grep -v '^$' > "$_CHECK_OUT.path"
+# mise install dirs and antidote plugin bins (~/.cache or ~/Library/Caches) exist only in interactive zsh by design.
+printf '%s\n' "$PATH" | tr : '\n' | grep -v '/mise/installs/' | grep -v '/antidote/' | grep -v '^$' > "$_CHECK_OUT.path"
 dups=$(printf '%s\n' "$PATH" | tr : '\n' | grep -v '^$' | sort | uniq -d | tr '\n' ' ')
 {
   for c in screen jq mise python3 node go bun brew; do printf '%s=%s\n' "$c" "$(bin "$c" | norm)"; done
@@ -21,10 +21,11 @@ dups=$(printf '%s\n' "$PATH" | tr : '\n' | grep -v '^$' | sort | uniq -d | tr '\
 } > "$_CHECK_OUT.env"
 EOF
 
+# cd "$TMP": autovenv (interactive zsh) would otherwise activate a .venv above the caller's cwd.
 run() {
   name=$1; shift
-  env -i HOME="$HOME" USER="$USER" LOGNAME="$USER" TERM=xterm-256color PATH="$SYS_PATH" \
-    _CHECK_OUT="$TMP/$name" _CHECK_VARS="$VARS" "$@" >/dev/null 2>&1 </dev/null
+  (cd "$TMP" && env -i HOME="$HOME" USER="$USER" LOGNAME="$USER" TERM=xterm-256color PATH="$SYS_PATH" \
+    _CHECK_OUT="$TMP/$name" _CHECK_VARS="$VARS" "$@" >/dev/null 2>&1 </dev/null)
 }
 P="$TMP/probe.sh"
 run zsh-login   zsh -lic ". $P"
