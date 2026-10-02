@@ -1,0 +1,3 @@
+# ~/.profile: executed by sh (and tools that mimic it) for login shells.
+
+[ -f "$HOME/.env" ] && . "$HOME/.env"

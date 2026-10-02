@@ -1,0 +1,4 @@
+# ~/.bashrc: executed by bash for interactive non-login shells.
+
+[ -f /etc/bashrc ] && . /etc/bashrc
+[ -f "$HOME/.env" ] && . "$HOME/.env"

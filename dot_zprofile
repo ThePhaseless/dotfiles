@@ -1,0 +1,5 @@
+# ~/.zprofile: executed by zsh for login shells.
+
+# /etc/zprofile runs after ~/.zshenv and can reorder PATH (macOS path_helper); load ~/.env again.
+unset DOTENV_LOADED
+[ -f "$HOME/.env" ] && . "$HOME/.env"

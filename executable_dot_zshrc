@@ -165,29 +165,11 @@ safe_smartcache eval zoxide init zsh --no-cmd
 # `env -i` gives the command a clean, deterministic environment so that the
 # cache does not keep invalidating itself because the parent shell already
 # loaded mise and exported MISE_* / __MISE_* variables.
-safe_smartcache eval env -i HOME=/home/orcho TERM=xterm-256color PATH=/usr/bin:/bin zsh -c 'source ~/.env; rehash; mise activate zsh | sed "/^_mise_hook$/d"'
+# That clean PATH leaks into the output as `export PATH=` / `__MISE_ORIG_PATH=`
+# lines; they are stripped so the shell keeps its own PATH.
+safe_smartcache eval env -i HOME="$HOME" TERM=xterm-256color PATH=/usr/bin:/bin zsh -c 'source ~/.env; rehash; mise activate zsh | sed -E -e "/^_mise_hook( --force)?$/d" -e "/^export (__MISE_ORIG_)?PATH=/d"'
 
-if [[ -f /home/linuxbrew/.linuxbrew/bin/brew ]]; then
-    export HOMEBREW_NO_ENV_HINTS=1
-    export HOMEBREW_PREFIX="/home/linuxbrew/.linuxbrew";
-    export HOMEBREW_CELLAR="/home/linuxbrew/.linuxbrew/Cellar";
-    export HOMEBREW_REPOSITORY="/home/linuxbrew/.linuxbrew/Homebrew";
-    fpath[1,0]="/home/linuxbrew/.linuxbrew/share/zsh/site-functions";
-    export PATH="/home/linuxbrew/.linuxbrew/bin:/home/linuxbrew/.linuxbrew/sbin${PATH+:$PATH}";
-    [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";
-    export INFOPATH="/home/linuxbrew/.linuxbrew/share/info:${INFOPATH:-}";
-elif [[ -f /opt/homebrew/bin/brew ]]; then
-    # Must run after /etc/zprofile: its path_helper puts /usr/bin ahead of anything ~/.env prepends,
-    # and Apple ships stale same-named tools there (screen 4.00.03, jq, openssl).
-    export HOMEBREW_NO_ENV_HINTS=1
-    export HOMEBREW_PREFIX="/opt/homebrew";
-    export HOMEBREW_CELLAR="/opt/homebrew/Cellar";
-    export HOMEBREW_REPOSITORY="/opt/homebrew";
-    fpath[1,0]="/opt/homebrew/share/zsh/site-functions";
-    export PATH="/opt/homebrew/bin:/opt/homebrew/sbin${PATH+:$PATH}";
-    [ -z "${MANPATH-}" ] || export MANPATH=":${MANPATH#:}";
-    export INFOPATH="/opt/homebrew/share/info:${INFOPATH:-}";
-fi
+[[ -n $HOMEBREW_PREFIX ]] && fpath[1,0]="$HOMEBREW_PREFIX/share/zsh/site-functions"
 
 # Custom cd wrapper to suppress error if already in target directory
 function cd() {

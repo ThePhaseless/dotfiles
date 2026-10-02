@@ -5,10 +5,64 @@
 [ -n "${DOTENV_LOADED:-}" ] && return
 DOTENV_LOADED=1
 
-export PATH="$HOME/.local/bin:$HOME/.local/share/mise/shims:$HOME/.bun/bin:$PATH"
+# Moves an existing entry to the front instead of adding a duplicate: login shells
+# source this file again after /etc/profile (macOS path_helper) has reordered PATH.
+_dotenv_path_prepend() {
+    [ -d "$1" ] || return 0
+    _dotenv_p=":$PATH:"
+    while :; do
+        case $_dotenv_p in
+            *":$1:"*) _dotenv_p="${_dotenv_p%%":$1:"*}:${_dotenv_p#*":$1:"}" ;;
+            *) break ;;
+        esac
+    done
+    _dotenv_p=${_dotenv_p#:}
+    _dotenv_p=${_dotenv_p%:}
+    PATH="$1${_dotenv_p:+:$_dotenv_p}"
+}
+
+for _dotenv_brew in /opt/homebrew /home/linuxbrew/.linuxbrew; do
+    if [ -x "$_dotenv_brew/bin/brew" ]; then
+        export HOMEBREW_PREFIX="$_dotenv_brew"
+        export HOMEBREW_NO_ENV_HINTS=1
+        break
+    fi
+done
+[ -d "$HOME/.volta" ] && export VOLTA_HOME="$HOME/.volta"
+[ -d "$HOME/.bun" ] && export BUN_INSTALL="$HOME/.bun"
+
+# Lowest priority first: each entry is moved to the front in turn. Missing dirs are skipped.
+for _dotenv_dir in \
+    "$HOME/.local/share/JetBrains/Toolbox/scripts" \
+    "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" \
+    "$HOME/.lmstudio/bin" \
+    "$HOME/.duckdb/cli/latest" \
+    "$HOME/.opencode/bin" \
+    "$HOME/.devcontainers/bin" \
+    "$HOME/.docker/bin" \
+    "$HOME/.npm/global-modules/bin" \
+    "$HOME/dev/go/bin" \
+    "$HOME/go/bin" \
+    "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin}" \
+    "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin}" \
+    "$HOME/.volta/bin" \
+    "$HOME/.bun/bin" \
+    "$HOME/.cargo/bin" \
+    "$HOME/.local/share/mise/shims" \
+    "$HOME/.local/bin"
+do
+    _dotenv_path_prepend "$_dotenv_dir"
+done
+export PATH
+
 export EDITOR="{{ if lookPath "zed" }}zed --wait{{ else if lookPath "code" }}code --wait{{ else }}nano{{ end }}"
 export LANG="en_US.UTF-8"
 export VIRTUAL_ENV_DISABLE_PROMPT=1
+export BASH_ENV="$HOME/.env"
 
 # Device-specific overrides and secrets (not tracked by Chezmoi).
+# Machine-only PATH entries can use _dotenv_path_prepend here.
 [ -f "$HOME/.env.local" ] && . "$HOME/.env.local"
+
+unset -f _dotenv_path_prepend
+unset _dotenv_p _dotenv_brew _dotenv_dir

@@ -8,23 +8,25 @@ This directory is the chezmoi **source**. Files in `~` are generated **targets**
 2. For shell files, run `zsh -n <file>` (or `sh -n` for `dot_env.tmpl` after `chezmoi execute-template < dot_env.tmpl`).
 3. Run `chezmoi diff <target>` and confirm only your change shows up.
 4. Run `chezmoi apply <target>` — always with explicit targets, see "Target drift".
-5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell.
+5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach.
 
-Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. Repo-only files (this one, `README.md`, `install.sh`) are listed in `.chezmoiignore`; add any new repo-only file there too.
+Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`) are listed in `.chezmoiignore`; add any new repo-only file there too.
 
 ## Where a setting belongs
 
 | Setting | File | Loaded by |
 | --- | --- | --- |
-| Env var for every shell and script | `dot_env.tmpl` → `~/.env` | `.zshenv` (all zsh), `.bash_profile` + `BASH_ENV` (all bash, including non-interactive scripts) |
-| Machine-specific value or secret | `~/.env.local` (untracked) | sourced at the end of `~/.env` |
+| Env var or PATH entry for every shell and script | `dot_env.tmpl` → `~/.env` | `.zshenv` (all zsh), `.zprofile` (login zsh), `.bash_profile` / `.bashrc` / `BASH_ENV` (all bash), `.profile` (login sh) |
+| Machine-specific value, PATH entry or secret | `~/.env.local` (untracked) | sourced at the end of `~/.env` |
+| Shell loaders | `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_bash_profile`, `dot_bashrc` | the shell; each only sources `~/.env` (plus `/etc/bashrc`, `~/.bashrc`) |
 | Interactive zsh only (prompt, completions, hooks, keybinds) | `executable_dot_zshrc` | interactive zsh |
 | zsh plugins | `dot_zsh_plugins.txt` | antidote, rebuilt when the file is newer than `~/.zsh_plugins.zsh` |
 
 Rules for `~/.env`:
 
 - Plain POSIX `sh`: bash, zsh and `sh` source it directly; any other shell can import it with `sh -c '. ~/.env; env -0'`.
-- `DOTENV_LOADED` (unexported) makes re-sourcing in the same shell a no-op; child shells load it fresh.
+- `DOTENV_LOADED` (unexported) makes re-sourcing in the same shell a no-op; child shells load it fresh. `.zprofile` unsets it to load `~/.env` again after `/etc/zprofile`, whose macOS `path_helper` puts system dirs back in front.
+- Every PATH entry goes through `_dotenv_path_prepend` (also usable in `~/.env.local`): it skips missing dirs and moves an existing entry to the front, so re-sourcing never duplicates. The list in `dot_env.tmpl` runs lowest priority first.
 - Secrets and API keys go only in `~/.env.local`, which chezmoi creates from `create_dot_env.local.tmpl` once and never tracks. Edit `~/.env.local` directly.
 
 ## Target drift

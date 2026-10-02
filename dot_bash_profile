@@ -1,5 +1,4 @@
 # ~/.bash_profile: executed by bash for login shells.
 
 [ -f "$HOME/.env" ] && . "$HOME/.env"
-[ -f "$HOME/.profile" ] && . "$HOME/.profile"
-export BASH_ENV="$HOME/.env"
+case $- in *i*) [ -f "$HOME/.bashrc" ] && . "$HOME/.bashrc" ;; esac
