@@ -5,3 +5,5 @@ skills:
   enableClaudeUser: true
 marketplace:
   autoUpdate: auto
+extensions:
+  - ~/.claude/plugins/marketplaces/superpowers-dev
