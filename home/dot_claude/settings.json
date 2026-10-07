@@ -67,5 +67,6 @@
       "effortLevel": "high"
     }
   },
-  "theme": "auto"
+  "theme": "auto",
+  "tui": "fullscreen"
 }

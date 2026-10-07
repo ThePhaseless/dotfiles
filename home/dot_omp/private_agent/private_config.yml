@@ -1,1 +1,7 @@
 setupVersion: 2
+enabledProviders:
+  - claude
+skills:
+  enableClaudeUser: true
+marketplace:
+  autoUpdate: auto

@@ -24,4 +24,5 @@
 .omp/logs
 .omp/natives
 .omp/run
-.omp/plugins/node_modules
+.omp/plugins
+.omp/marketplaces.json
