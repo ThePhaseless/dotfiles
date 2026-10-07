@@ -1,0 +1,27 @@
+# Claude Code: only settings/instructions are tracked; never state or secrets
+.claude/.credentials.json
+.claude/history.jsonl
+.claude/projects
+.claude/sessions
+.claude/session-env
+.claude/shell-snapshots
+.claude/cache
+.claude/backups
+.claude/downloads
+.claude/plugins
+.claude.json
+
+# omp: only config is tracked; never state, caches or secrets
+.omp/agent/*.db
+.omp/agent/*.db-*
+.omp/agent/sessions
+.omp/agent/terminal-sessions
+.omp/agent/cache
+.omp/agent/managed-skills
+.omp/agent/secrets.yml
+.omp/agent/secret-placeholder.key
+.omp/agent/last-changelog-version
+.omp/logs
+.omp/natives
+.omp/run
+.omp/plugins/node_modules

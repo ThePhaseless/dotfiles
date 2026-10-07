@@ -10,7 +10,7 @@ This directory is the chezmoi **source**. Files in `~` are generated **targets**
 4. Run `chezmoi apply <target>` — always with explicit targets, see "Target drift".
 5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach.
 
-Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`) are listed in `.chezmoiignore`; add any new repo-only file there too.
+Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. The source state lives in `home/` (set by `.chezmoiroot`); every source name in this file is relative to it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`, `chezmoi-auto-update.sh`) sit at the repo root, outside `home/`, so they are never applied. `home/.chezmoiignore` guards target paths that must never be tracked.
 
 ## Where a setting belongs
 
@@ -21,6 +21,9 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 | Shell loaders | `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_bash_profile`, `dot_bashrc` | the shell; each only sources `~/.env` (plus `/etc/bashrc`, `~/.bashrc`) |
 | Interactive zsh only (prompt, completions, hooks, keybinds) | `executable_dot_zshrc` | interactive zsh |
 | zsh plugins | `dot_zsh_plugins.txt` | antidote, rebuilt when the file is newer than `~/.zsh_plugins.zsh` |
+| Agent guide for working anywhere in `~` | `AGENTS.md` → `~/AGENTS.md` (`CLAUDE.md` imports it) | Claude Code (walks up to `~`), omp outside git repos |
+| Claude Code settings and global instructions | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` and Claude plugins |
+| omp settings | `dot_omp/private_agent/private_config.yml` | omp |
 
 Rules for `~/.env`:
 
