@@ -245,11 +245,39 @@ if [ -f /var/run/motd.dynamic ]; then
 fi
 
 ## Start async chezmoi auto-updater (Rate-limited to once per hour)
-if command -v bash >/dev/null 2>&1 && [[ -f "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" ]]; then
+# It runs detached from the terminal, so it can never stop on a prompt. Its
+# result and any files changed both in ~ and in the repo show up at the prompt.
+_dotfiles_updater="$HOME/.local/share/chezmoi/chezmoi-auto-update.sh"
+_dotfiles_state="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi-auto-update"
+
+dotfiles-resolve() { bash "$_dotfiles_updater" resolve; }
+
+_dotfiles_notice() {
+    if [[ -s $_dotfiles_state/notice ]]; then
+        print -Pn '%F{cyan}[dotfiles]%f '
+        print -r -- "$(<$_dotfiles_state/notice)"
+        rm -f $_dotfiles_state/notice
+    fi
+    local conflicts=
+    [[ -s $_dotfiles_state/conflicts ]] && conflicts=$(<$_dotfiles_state/conflicts)
+    if [[ -n $conflicts && $conflicts != $_dotfiles_conflicts_shown ]]; then
+        print -Pn '%F{yellow}[dotfiles]%f '
+        print -r -- "not applied, changed in ~ and in the repo: ${(j:, :)${(f)conflicts}}. Run dotfiles-resolve."
+    fi
+    _dotfiles_conflicts_shown=$conflicts
+}
+add-zsh-hook precmd _dotfiles_notice
+
+if command -v bash >/dev/null 2>&1 && [[ -f $_dotfiles_updater ]]; then
     local update_marker="/tmp/.chezmoi_last_update"
 
     if [[ ! -f "$update_marker" ]] || [[ -z $(find "$update_marker" -mmin -60 2>/dev/null) ]]; then
         touch "$update_marker"
-        ( bash "$HOME/.local/share/chezmoi/chezmoi-auto-update.sh" > /tmp/chezmoi-update.log 2>&1 ) &|
+        mkdir -p $_dotfiles_state
+        if (( $+commands[setsid] )); then
+            setsid -f bash $_dotfiles_updater </dev/null >$_dotfiles_state/log 2>&1
+        else
+            bash $_dotfiles_updater </dev/null >$_dotfiles_state/log 2>&1 &|
+        fi
     fi
 fi

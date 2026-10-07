@@ -48,7 +48,8 @@ Tool installers (rustup, brew, etc.) append lines to targets such as `~/.zshenv`
 
 ## Auto-update and git
 
-- `.zshrc` runs `chezmoi-auto-update.sh` in the background at most hourly. It runs `chezmoi update --apply` only when this repo is clean, so uncommitted work here pauses updates on this machine.
+- `.zshrc` runs `chezmoi-auto-update.sh` at most hourly, detached from the terminal (`setsid`, stdin `/dev/null`, `--no-tty`), so it can never stop on a prompt. It pulls and applies only when this repo is clean, so uncommitted work here pauses updates on this machine.
+- A target edited in `~` since chezmoi last wrote it (Claude Code rewrites `~/.claude/settings.json`) is not applied; everything else is. State lives in `~/.local/state/chezmoi-auto-update/`: `log`, `notice` (shown once at the next prompt) and `conflicts` (shown until resolved). `dotfiles-resolve` walks each conflict: keep the `~` version (`chezmoi re-add`), take the repo version, or merge.
 - `chezmoi add` / `chezmoi edit` auto-commit and auto-push (see `.chezmoi.toml.tmpl`). When editing files here directly, commit with plain `git` once the user asks.
 
 ## Machine quirks
