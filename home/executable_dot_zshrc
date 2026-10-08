@@ -281,10 +281,13 @@ _dotfiles_precmd() {
 add-zsh-hook precmd _dotfiles_precmd
 
 # Called by zle when the updater exits while this shell waits at the prompt.
+# With text on the command line it prints nothing; precmd shows the notice
+# after that command instead, so it never lands in the middle of typing.
 _dotfiles_done() {
     local fd=$1
     zle -F $fd
     exec {fd}<&-
+    [[ -z $BUFFER ]] || return 0
     local -a reply
     _dotfiles_pending
     if (( $#reply )); then
@@ -305,6 +308,7 @@ if command -v bash >/dev/null 2>&1 && [[ -f $_dotfiles_updater ]]; then
         # trailing `:` keeps the subshell that holds the pipe alive until then.
         local _dotfiles_fd
         exec {_dotfiles_fd}< <($_dotfiles_run </dev/null >$_dotfiles_state/log 2>&1; :)
-        zle -F $_dotfiles_fd _dotfiles_done
+        zle -N _dotfiles_done
+        zle -F -w $_dotfiles_fd _dotfiles_done
     fi
 fi
