@@ -49,7 +49,9 @@ Tool installers (rustup, brew, etc.) append lines to targets such as `~/.zshenv`
 ## Auto-update and git
 
 - `.zshrc` runs `chezmoi-auto-update.sh` at most hourly, detached from the terminal (`setsid`, stdin `/dev/null`, `--no-tty`), so it can never stop on a prompt. It pulls and applies only when this repo is clean, so uncommitted work here pauses updates on this machine.
-- A target edited in `~` since chezmoi last wrote it (Claude Code rewrites `~/.claude/settings.json`) is not applied; everything else is. State lives in `~/.local/state/chezmoi-auto-update/`: `log`, `notice` (shown once at the next prompt) and `conflicts` (shown until resolved). `dotfiles-resolve` walks each conflict: keep the `~` version (`chezmoi re-add`), take the repo version, or merge.
+- It never overwrites a target edited in `~` since chezmoi last wrote it (Claude Code rewrites `~/.claude/settings.json`, omp rewrites `~/.omp/agent/config.yml`). If only `~` changed, it keeps the edit silently; if the repo changed that file too, it records a conflict.
+- It is silent unless it applied something, found a conflict or skipped because this repo is dirty (that notice repeats every run until you commit). Then every shell started before it shows one line: at the next prompt, or right away if the shell sits idle at the prompt. Updated files come with a restart hint (`exec zsh` for shell files); conflicts name `dotfiles-resolve`, which walks each one: keep the `~` version (`chezmoi re-add`), take the repo version, or merge.
+- State lives in `~/.local/state/chezmoi-auto-update/`: `log` (last run), `notice` and `conflicts`.
 - `chezmoi add` / `chezmoi edit` auto-commit and auto-push (see `.chezmoi.toml.tmpl`). When editing files here directly, commit with plain `git` once the user asks.
 
 ## Machine quirks

@@ -245,28 +245,53 @@ if [ -f /var/run/motd.dynamic ]; then
 fi
 
 ## Start async chezmoi auto-updater (Rate-limited to once per hour)
-# It runs detached from the terminal, so it can never stop on a prompt. Its
-# result and any files changed both in ~ and in the repo show up at the prompt.
+# It runs detached from the terminal, so it can never stop on a prompt. It
+# writes a notice only when it changed files in ~ or found a conflict; the
+# notice shows once in every shell started before it, at the next prompt or as
+# soon as the update finishes while this shell sits at the prompt.
+zmodload -F zsh/stat b:zstat
+zmodload zsh/datetime
 _dotfiles_updater="$HOME/.local/share/chezmoi/chezmoi-auto-update.sh"
 _dotfiles_state="${XDG_STATE_HOME:-$HOME/.local/state}/chezmoi-auto-update"
+typeset -g _dotfiles_seen=$EPOCHSECONDS _dotfiles_conflicts_shown=
 
 dotfiles-resolve() { bash "$_dotfiles_updater" resolve; }
 
-_dotfiles_notice() {
-    if [[ -s $_dotfiles_state/notice ]]; then
-        print -Pn '%F{cyan}[dotfiles]%f '
-        print -r -- "$(<$_dotfiles_state/notice)"
-        rm -f $_dotfiles_state/notice
+# Set reply to the lines not yet shown in this shell.
+_dotfiles_pending() {
+    reply=()
+    local -a mtime
+    if zstat -A mtime +mtime -- $_dotfiles_state/notice 2>/dev/null && (( mtime[1] >= _dotfiles_seen )); then
+        _dotfiles_seen=$(( mtime[1] + 1 ))
+        reply+=("${(%):-%F{cyan\}[dotfiles]%f} $(<$_dotfiles_state/notice)")
     fi
     local conflicts=
     [[ -s $_dotfiles_state/conflicts ]] && conflicts=$(<$_dotfiles_state/conflicts)
     if [[ -n $conflicts && $conflicts != $_dotfiles_conflicts_shown ]]; then
-        print -Pn '%F{yellow}[dotfiles]%f '
-        print -r -- "not applied, changed in ~ and in the repo: ${(j:, :)${(f)conflicts}}. Run dotfiles-resolve."
+        reply+=("${(%):-%F{yellow\}[dotfiles]%f} not applied, changed both in ~ and in the repo: ~/${(pj:, ~/:)${(f)conflicts}}. Run: dotfiles-resolve")
     fi
     _dotfiles_conflicts_shown=$conflicts
 }
-add-zsh-hook precmd _dotfiles_notice
+
+_dotfiles_precmd() {
+    local -a reply
+    _dotfiles_pending
+    (( $#reply )) && print -rl -- $reply
+}
+add-zsh-hook precmd _dotfiles_precmd
+
+# Called by zle when the updater exits while this shell waits at the prompt.
+_dotfiles_done() {
+    local fd=$1
+    zle -F $fd
+    exec {fd}<&-
+    local -a reply
+    _dotfiles_pending
+    if (( $#reply )); then
+        zle -I
+        print -rl -- $reply
+    fi
+}
 
 if command -v bash >/dev/null 2>&1 && [[ -f $_dotfiles_updater ]]; then
     local update_marker="/tmp/.chezmoi_last_update"
@@ -274,10 +299,12 @@ if command -v bash >/dev/null 2>&1 && [[ -f $_dotfiles_updater ]]; then
     if [[ ! -f "$update_marker" ]] || [[ -z $(find "$update_marker" -mmin -60 2>/dev/null) ]]; then
         touch "$update_marker"
         mkdir -p $_dotfiles_state
-        if (( $+commands[setsid] )); then
-            setsid -f bash $_dotfiles_updater </dev/null >$_dotfiles_state/log 2>&1
-        else
-            bash $_dotfiles_updater </dev/null >$_dotfiles_state/log 2>&1 &|
-        fi
+        local -a _dotfiles_run=(bash $_dotfiles_updater)
+        (( $+commands[setsid] )) && _dotfiles_run=(setsid -w $_dotfiles_run)
+        # The pipe closes when the updater exits, which wakes _dotfiles_done. The
+        # trailing `:` keeps the subshell that holds the pipe alive until then.
+        local _dotfiles_fd
+        exec {_dotfiles_fd}< <($_dotfiles_run </dev/null >$_dotfiles_state/log 2>&1; :)
+        zle -F $_dotfiles_fd _dotfiles_done
     fi
 fi
