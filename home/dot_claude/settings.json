@@ -1,4 +1,7 @@
 {
+  "attribution": {
+    "pr": ""
+  },
   "enabledPlugins": {
     "superpowers@superpowers-dev": true,
     "humanizer@humanizer": true,
