@@ -1,0 +1,14 @@
+{{- /* truecolor needs screen 5+; macOS's bundled /usr/bin/screen is 4.00.03 and Ubuntu 24.04 ships 4.09. */ -}}
+{{- $screenMajor := 0 -}}
+{{- with lookPath "screen" -}}
+{{-   $screenMajor = output . "--version" | regexFind "version [0-9]+" | trimPrefix "version " | atoi -}}
+{{- end -}}
+term screen-256color
+{{- if ge $screenMajor 5 }}
+truecolor on
+# ssh does not forward COLORTERM, so apps inside would otherwise fall back to 256 colors.
+setenv COLORTERM truecolor
+{{- else }}
+# screen {{ $screenMajor }} cannot pass 24-bit color; clear an inherited COLORTERM so apps use 256 colors.
+unsetenv COLORTERM
+{{- end }}
