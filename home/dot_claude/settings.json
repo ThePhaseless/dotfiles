@@ -12,7 +12,16 @@
     "code-simplifier@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
     "code-review@claude-code-plugins": true,
-    "frontend-design@claude-code-plugins": true
+    "frontend-design@claude-code-plugins": true,
+    "claude-security@claude-plugins-official": true,
+    "code-review@claude-plugins-official": false,
+    "context7@claude-plugins-official": false,
+    "claude-md-management@claude-plugins-official": false,
+    "feature-dev@claude-plugins-official": false,
+    "security-guidance@claude-plugins-official": false,
+    "explanatory-output-style@claude-plugins-official": false,
+    "code-tidying@melodic-software": false,
+    "superpowers@superpowers-marketplace": false
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
@@ -72,6 +81,6 @@
   },
   "tui": "fullscreen",
   "theme": "auto",
-  "agentPushNotifEnabled": true,
-  "inputNeededNotifEnabled": true
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true
 }

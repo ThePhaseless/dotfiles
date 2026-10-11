@@ -24,6 +24,9 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 | Agent guide for working anywhere in `~` | `AGENTS.md` → `~/AGENTS.md` (`CLAUDE.md` imports it) | Claude Code (walks up to `~`), omp outside git repos |
 | Claude Code settings and global instructions | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` and Claude plugins |
 | omp settings | `dot_omp/private_agent/private_config.yml` | omp |
+| omp bridges for Claude plugin hooks | `dot_omp/private_agent/extensions/*.ts` | omp, auto-loaded from `~/.omp/agent/extensions/` |
+
+Anything installed into Claude Code must also work in omp: see "Claude Code and omp parity" in `home/AGENTS.md` (`~/AGENTS.md`) for what omp loads, how to bridge hooks, and the current exceptions. Keep that table current when you add, bridge or hide a plugin.
 
 Rules for `~/.env`:
 
