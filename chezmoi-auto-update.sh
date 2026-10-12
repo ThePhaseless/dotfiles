@@ -70,9 +70,34 @@ list_names() {
     printf '%s' "$out"
 }
 
+# Take the updater lock, or return 1 if another run holds it. flock where it
+# exists (Linux). Otherwise (macOS has no flock) a lock directory: mkdir is
+# atomic, and the holder's PID inside lets the next run clear a lock left by a
+# killed run. A lock without a PID is still being taken, unless it is old.
+acquire_lock() {
+    if command -v flock >/dev/null 2>&1; then
+        exec 9>"$LOCKFILE"
+        flock -n 9
+        return
+    fi
+    LOCKDIR="$LOCKFILE.d"
+    if ! mkdir "$LOCKDIR" 2>/dev/null; then
+        local pid
+        pid=$(cat "$LOCKDIR/pid" 2>/dev/null) || pid=""
+        if [ -n "$pid" ]; then
+            if kill -0 "$pid" 2>/dev/null; then return 1; fi
+        elif [ -z "$(find "$LOCKDIR" -maxdepth 0 -mmin +10 2>/dev/null)" ]; then
+            return 1
+        fi
+        rm -rf "$LOCKDIR"
+        mkdir "$LOCKDIR" 2>/dev/null || return 1
+    fi
+    echo $$ >"$LOCKDIR/pid"
+    trap 'rm -rf "$LOCKDIR"' EXIT
+}
+
 update() {
-    exec 9>"$LOCKFILE"
-    if command -v flock >/dev/null 2>&1 && ! flock -n 9; then
+    if ! acquire_lock; then
         log "Updater already running. Exiting."
         exit 0
     fi
