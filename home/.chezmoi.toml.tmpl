@@ -14,3 +14,17 @@ commitMessageTemplate = {{`"{{ promptString \"Commit message\" }}"`}}
 [edit]
 apply = true
 watch = true
+
+# Merge in the same GUI editor as $EDITOR (see dot_env.tmpl) instead of vimdiff.
+# The merge result is the source file: edit and save it, then close the tab.
+{{- if lookPath "zed" }}
+
+[merge]
+command = "zed"
+args = ["--wait", "--diff", {{`"{{ .Destination }}"`}}, {{`"{{ .Source }}"`}}]
+{{- else if lookPath "code" }}
+
+[merge]
+command = "bash"
+args = ["-c", {{`"cp '{{ .Target }}' '{{ .Target }}.base' && code --new-window --wait --merge '{{ .Destination }}' '{{ .Target }}' '{{ .Target }}.base' '{{ .Source }}'"`}}]
+{{- end }}

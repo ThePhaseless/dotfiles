@@ -23,7 +23,7 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 | zsh plugins | `dot_zsh_plugins.txt` | antidote, rebuilt when the file is newer than `~/.zsh_plugins.zsh` |
 | Agent guide for working anywhere in `~` | `AGENTS.md` → `~/AGENTS.md` (`CLAUDE.md` imports it) | Claude Code (walks up to `~`), omp outside git repos |
 | Claude Code settings and global instructions | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` and Claude plugins |
-| omp settings | `dot_omp/private_agent/private_config.yml` | omp |
+| omp settings | `dot_omp/private_agent/modify_private_config.yml` (modify template: keeps the local `modelRoles` block, written in omp's comment-free format) | omp |
 | omp bridges for Claude plugin hooks | `dot_omp/private_agent/extensions/*.ts` | omp, auto-loaded from `~/.omp/agent/extensions/` |
 
 Anything installed into Claude Code must also work in omp: see "Claude Code and omp parity" in `home/AGENTS.md` (`~/AGENTS.md`) for what omp loads, how to bridge hooks, and the current exceptions. Keep that table current when you add, bridge or hide a plugin.
@@ -53,7 +53,7 @@ Tool installers (rustup, brew, etc.) append lines to targets such as `~/.zshenv`
 
 - `.zshrc` runs `chezmoi-auto-update.sh` at most hourly, detached from the terminal (`setsid`, stdin `/dev/null`, `--no-tty`), so it can never stop on a prompt. It pulls and applies only when this repo is clean, so uncommitted work here pauses updates on this machine.
 - It never overwrites a target edited in `~` since chezmoi last wrote it (Claude Code rewrites `~/.claude/settings.json`, omp rewrites `~/.omp/agent/config.yml`). If only `~` changed, it keeps the edit silently; if the repo changed that file too, it records a conflict.
-- It is silent unless it applied something, found a conflict or skipped because this repo is dirty (that notice repeats every run until you commit). Then every shell started before it shows one line: at the next prompt, or right away if the shell sits idle at the prompt. Updated files come with a restart hint (`exec zsh` for shell files); conflicts name `dotfiles-resolve`, which walks each one: keep the `~` version (`chezmoi re-add`), take the repo version, or merge.
+- It is silent unless it applied something, found a conflict or skipped because this repo is dirty (that notice repeats every run until you commit). Then every shell started before it shows one line: at the next prompt, or right away if the shell sits idle at the prompt. Updated files come with a restart hint (`exec zsh` for shell files); conflicts name `dotfiles-resolve`, which walks each one: keep the `~` version (`chezmoi re-add`), take the repo version, or merge in Zed (VS Code without Zed; `[merge]` in `.chezmoi.toml.tmpl`, applied by `chezmoi init`), which asks before applying the merged result.
 - State lives in `~/.local/state/chezmoi-auto-update/`: `log` (last run), `notice` and `conflicts`.
 - `chezmoi add` / `chezmoi edit` auto-commit and auto-push (see `.chezmoi.toml.tmpl`). When editing files here directly, commit with plain `git` once the user asks.
 

@@ -1,0 +1,39 @@
+{{- /* chezmoi:modify-template */ -}}
+{{- /*
+omp rewrites this file as plain YAML: it drops comments and the final newline.
+The tracked part below is written the same way, so a save from omp changes
+nothing here. Notes live in these template comments instead.
+
+modelRoles (the /model choice) is machine-local and changes often: it is never
+tracked, and the block already in ~/.omp/agent/config.yml is kept on every
+apply. Set it with /model in omp or `omp config set modelRoles '{...}'`.
+
+claude-security runs its scan as a Claude Code Workflow script, which omp
+cannot execute; hide its skill and pipeline agents (omp has its own
+security_scan tool).
+*/ -}}
+setupVersion: 2
+enabledProviders:
+  - claude
+skills:
+  enableClaudeUser: true
+marketplace:
+  autoUpdate: auto
+extensions:
+  - ~/.claude/plugins/marketplaces/superpowers-dev
+disabledExtensions:
+  - skill:claude-security
+task:
+  disabledAgents:
+    - claude-security
+    - explore
+    - patch-generator
+    - patch-verifier
+    - scan-inventory
+    - scan-loader
+    - scan-redactor
+    - scan-researcher
+    - scan-verifier
+{{- with regexFind `(?m)^modelRoles:.*(?:\n[ \t]+.*)*` .chezmoi.stdin }}
+{{ trimSuffix "\n" . }}
+{{- end -}}

@@ -176,7 +176,7 @@ resolve() {
         exit 1
     fi
 
-    local t answer
+    local t answer src
     local -a conflicts=() left=()
     if [ -s "$STATE/conflicts" ]; then
         while IFS= read -r t; do [ -n "$t" ] && conflicts+=("$t"); done <"$STATE/conflicts"
@@ -194,14 +194,40 @@ resolve() {
             read -r -p "[k]eep ~ version (re-add to repo), [r]epo version, [m]erge, [s]kip? " answer </dev/tty
             case "$answer" in
             k)
-                if [[ "$(chezmoi source-path "$HOME/$t")" == *.tmpl ]]; then
-                    echo "Template source: re-add cannot save it. Use [m]erge."
+                src=$(chezmoi source-path "$HOME/$t")
+                case "$(basename "$src")" in
+                *.tmpl | modify_*)
+                    echo "Template source: re-add cannot save it. Use [m]erge or edit $src."
                     continue
-                fi
+                    ;;
+                esac
                 chezmoi re-add "$HOME/$t"
                 ;;
             r) chezmoi apply --force "$HOME/$t" ;;
-            m) chezmoi merge "$HOME/$t" && chezmoi apply --force "$HOME/$t" ;;
+            m)
+                # The merge tool writes its result into the source file. Keep a
+                # copy so closing the tool without the intended result can be
+                # undone instead of overwriting the ~ version.
+                local backup
+                src=$(chezmoi source-path "$HOME/$t")
+                backup=$(mktemp)
+                cp -p "$src" "$backup"
+                if chezmoi merge "$HOME/$t"; then
+                    echo "Merged result. Diff: - ~ version, + merged version"
+                    chezmoi diff --no-pager "$HOME/$t" || true
+                    read -r -p "Apply the merged result to ~? [y/N] " answer </dev/tty
+                else
+                    answer=n
+                fi
+                if [ "$answer" != y ]; then
+                    cp -p "$backup" "$src"
+                    rm -f "$backup"
+                    echo "Merge discarded; ~/$t and the repo are unchanged."
+                    continue
+                fi
+                rm -f "$backup"
+                chezmoi apply --force "$HOME/$t"
+                ;;
             s) left+=("$t") ;;
             *) continue ;;
             esac
