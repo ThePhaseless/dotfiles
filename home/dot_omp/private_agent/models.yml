@@ -1,0 +1,6 @@
+# Anthropic key for omp only. OMP_ANTHROPIC_API_KEY lives in ~/.env.local; omp reads
+# apiKey as an env var name. A separate name keeps the key out of Claude Code, which
+# would otherwise offer to bill ANTHROPIC_API_KEY instead of the subscription.
+providers:
+  anthropic:
+    apiKey: OMP_ANTHROPIC_API_KEY
