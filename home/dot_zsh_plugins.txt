@@ -12,7 +12,6 @@ QuarticCat/zsh-smartcache
 # Colors
 zpm-zsh/colors
 zpm-zsh/colorize kind:defer
-chrissicool/zsh-256color
 
 # Utils
 hcgraf/zsh-sudo # Double esc to sudo

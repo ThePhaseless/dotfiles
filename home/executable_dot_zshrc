@@ -8,6 +8,9 @@ bindkey '^M' accept-line
 # zsh-autocomplete and other plugins need a valid TERM. Provide a safe default
 # when the terminal emulator did not set one (e.g., some IDE terminals).
 [[ -z "$TERM" ]] && export TERM=xterm-256color
+# Upgrade a bare xterm to 256 colors. Replaces zsh-256color, which ran `toe -a`
+# (~50ms) on every start for any TERM not ending in -256color, e.g. xterm-ghostty.
+[[ "$TERM" == xterm ]] && export TERM=xterm-256color
 
 export _ZO_EXCLUDE_DIRS="!(@(node_modules|dist))"
 export DISABLE_AUTO_UPDATE="true"
@@ -74,11 +77,10 @@ init_locale() {
 }
 
 init_docker() {
-    # WSL: Docker Desktop may not be running even if the docker binary is in
-    # PATH. The /var/run/docker.sock check is fast; fall back to docker --version
-    # only when the socket is missing. If docker is unavailable, skip the plugin
-    # silently and avoid shell startup errors.
-    if [[ ! -S /var/run/docker.sock ]] && ! command docker --version >/dev/null 2>&1; then
+    # Load the plugin when either the socket or the binary exists. Probe with
+    # `command -v`, not by running docker: when docker is missing, running it
+    # calls command_not_found_handler (PackageKit on Fedora), which costs ~170ms.
+    if [[ ! -S /var/run/docker.sock ]] && ! command -v docker >/dev/null 2>&1; then
         return 0
     fi
 
