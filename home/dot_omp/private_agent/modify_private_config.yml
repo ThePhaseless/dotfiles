@@ -39,6 +39,9 @@ task:
     - scan-redactor
     - scan-researcher
     - scan-verifier
+browser:
+  relay: true
+  headless: false
 {{- with regexFind `(?m)^modelRoles:.*(?:\n[ \t]+.*)*` .chezmoi.stdin }}
 {{ trimSuffix "\n" . }}
 {{- end -}}
