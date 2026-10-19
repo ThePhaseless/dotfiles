@@ -22,7 +22,8 @@
     "security-guidance@claude-plugins-official": false,
     "explanatory-output-style@claude-plugins-official": false,
     "code-tidying@melodic-software": false,
-    "superpowers@superpowers-marketplace": false
+    "superpowers@superpowers-marketplace": false,
+    "mattpocock-skills@mattpocock": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
@@ -71,6 +72,13 @@
       "source": {
         "source": "github",
         "repo": "anthropics/claude-code"
+      },
+      "autoUpdate": true
+    },
+    "mattpocock": {
+      "source": {
+        "source": "github",
+        "repo": "mattpocock/skills"
       },
       "autoUpdate": true
     }

@@ -11,12 +11,17 @@ apply. Set it with /model in omp or `omp config set modelRoles '{...}'`.
 claude-security runs its scan as a Claude Code Workflow script, which omp
 cannot execute; hide its skill and pipeline agents (omp has its own
 security_scan tool).
+
+The skills keys match Claude Code: read ~/.claude/skills, skip .agents/skills
+(user and project), which Claude Code never loads.
 */ -}}
 setupVersion: 2
 enabledProviders:
   - claude
 skills:
   enableClaudeUser: true
+  enableAgentsUser: false
+  enableAgentsProject: false
 marketplace:
   autoUpdate: auto
 extensions:

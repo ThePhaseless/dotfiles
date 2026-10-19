@@ -21,12 +21,11 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 | Shell loaders | `dot_zshenv`, `dot_zprofile`, `dot_profile`, `dot_bash_profile`, `dot_bashrc` | the shell; each only sources `~/.env` (plus `/etc/bashrc`, `~/.bashrc`) |
 | Interactive zsh only (prompt, completions, hooks, keybinds) | `executable_dot_zshrc` | interactive zsh |
 | zsh plugins | `dot_zsh_plugins.txt` | antidote, rebuilt when the file is newer than `~/.zsh_plugins.zsh` |
-| Agent guide for working anywhere in `~` | `AGENTS.md` → `~/AGENTS.md` (`CLAUDE.md` imports it) | Claude Code (walks up to `~`), omp outside git repos |
-| Claude Code settings and global instructions | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` and Claude plugins |
+| Claude Code settings and global instructions, including the agent guide for working anywhere in `~` | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` (in every directory, unlike `~/AGENTS.md`, which it never reads) and Claude plugins |
 | omp settings | `dot_omp/private_agent/modify_private_config.yml` (modify template: keeps the local `modelRoles` block, written in omp's comment-free format) | omp |
 | omp bridges for Claude plugin hooks | `dot_omp/private_agent/extensions/*.ts` | omp, auto-loaded from `~/.omp/agent/extensions/` |
 
-Anything installed into Claude Code must also work in omp: see "Claude Code and omp parity" in `home/AGENTS.md` (`~/AGENTS.md`) for what omp loads, how to bridge hooks, and the current exceptions. Keep that table current when you add, bridge or hide a plugin.
+Anything installed into Claude Code must also work in omp: see "Claude Code and omp parity" in `home/dot_claude/CLAUDE.md` (`~/.claude/CLAUDE.md`) for what omp loads, how to bridge hooks, and the current exceptions. Keep that table current when you add, bridge or hide a plugin.
 
 Rules for `~/.env`:
 
