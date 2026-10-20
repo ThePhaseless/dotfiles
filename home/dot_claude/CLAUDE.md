@@ -84,6 +84,7 @@ Current bridges and exceptions:
 | linear | MCP server `linear:linear`; needs `/mcp reauth linear:linear` once per machine. Enabled in `~/.claude/settings.machine.json`; omp treats it as on because it is installed |
 | slack | Skills load without a prefix (`/skill:slack-search`), plus the `slack:*` commands; MCP server `slack:slack` needs `/mcp reauth slack:slack` once per machine. Enabled in `~/.claude/settings.machine.json`, like linear |
 | claude-security | Hidden: its scan is a Claude Code Workflow script. Use omp's `security_scan` tool |
+| ponytail | `ponytail-bridge.ts` loads the bundled pi-extension (ruleset injection, `/ponytail` commands, subagents) |
 
 ### Git
 

@@ -15,6 +15,8 @@
     "code-review@claude-code-plugins": true,
     "frontend-design@claude-code-plugins": true,
     "claude-security@claude-plugins-official": true,
+    "linear@claude-plugins-official": true,
+    "slack@claude-plugins-official": true,
     "code-review@claude-plugins-official": false,
     "context7@claude-plugins-official": false,
     "claude-md-management@claude-plugins-official": false,
@@ -23,7 +25,8 @@
     "explanatory-output-style@claude-plugins-official": false,
     "code-tidying@melodic-software": false,
     "superpowers@superpowers-marketplace": false,
-    "mattpocock-skills@mattpocock": true
+    "mattpocock-skills@mattpocock": true,
+    "ponytail@ponytail": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
@@ -81,15 +84,24 @@
         "repo": "mattpocock/skills"
       },
       "autoUpdate": true
+    },
+    "ponytail": {
+      "source": {
+        "source": "github",
+        "repo": "DietrichGebert/ponytail"
+      }
     }
   },
+  "feedbackDrafts": "off",
   "modelSettings": {
     "claude-opus-5-5": {
-      "effortLevel": "high"
+      "effortLevel": "xhigh"
     }
   },
   "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
   "theme": "auto",
+  "autoCompactEnabled": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true
 }
