@@ -8,6 +8,10 @@
 - Run independent subagents in parallel. Give each a self-contained brief: goal, relevant paths, constraints, and what to report back.
 - Check a subagent's output before acting on it.
 
+## Waiting in scripts
+
+Every wait in a script, loop or monitor is event-driven: it polls the real signal every 1–2 s and exits the moment the work succeeds, a failure shows (an error line, a non-zero exit, the watched process gone), or a short deadline passes. Set the deadline to the step's usual duration plus a small margin, seconds to a few minutes, and print which of the three ended the wait. After a timeout, inspect the state and change something before you wait again.
+
 ## Subagent model and effort
 
 When dispatching a subagent, choose its `model` and `effort` deliberately for that subtask instead of leaving the defaults. Weigh how much reasoning it needs against cost and speed, and decide per dispatch. You have standing permission to set `effort` this way.
