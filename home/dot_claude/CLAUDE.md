@@ -31,7 +31,6 @@ Skill descriptions alone miss these situations. Invoke the skill yourself before
 | Prose people read outside the chat: docs, READMEs, plans, specs, PR and issue bodies and comments, Linear issues and comments, Slack messages, Claude Docs, artifacts | `humanizer:humanizer` on the draft, before saving or sending it |
 | Agent-facing text: `SKILL.md`, `CLAUDE.md`, `AGENTS.md`, prompts for agents | `mattpocock-skills:writing-for-agents`, not humanizer |
 | A PR description | `mattpocock-skills:pr`, then `humanizer:humanizer` |
-| A commit message | `caveman:caveman-commit` |
 | Before committing, opening a PR, or saying work is done, fixed or passing | `superpowers:verification-before-completion` |
 | Before opening a PR or merging a non-trivial change | `superpowers:requesting-code-review` |
 | The first code edit in a session | `andrej-karpathy-skills:karpathy-guidelines` |
@@ -86,7 +85,7 @@ Current bridges and exceptions:
 | Plugin | In omp |
 | --- | --- |
 | superpowers | Skills via the claude provider; `extensions:` in omp's config loads its `.pi` bootstrap, which stands in for the SessionStart hook |
-| caveman | `caveman-bridge.ts` injects the ruleset, tracks mode switches and passes the mode to subagents; no per-turn reminder or `/caveman-stats` |
+|i-have-adhd|`i-have-adhd-bridge.ts` injects the ruleset, tracks state across turns and handles `/i-have-adhd` commands and subagents|
 | impeccable | `impeccable-bridge.ts` runs the plugin's hook script after edits and at session start/stop |
 | context7 | MCP server `context7:context7`; needs `/mcp reauth context7:context7` once per machine |
 | linear | MCP server `linear:linear`; needs `/mcp reauth linear:linear` once per machine. Enabled in `~/.claude/settings.machine.json`; omp treats it as on because it is installed |

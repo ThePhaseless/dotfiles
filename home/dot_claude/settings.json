@@ -8,7 +8,6 @@
     "humanizer@humanizer": true,
     "andrej-karpathy-skills@karpathy-skills": true,
     "impeccable@impeccable": true,
-    "caveman@caveman": true,
     "context7@context7-marketplace": true,
     "code-simplifier@claude-plugins-official": true,
     "skill-creator@claude-plugins-official": true,
@@ -26,7 +25,8 @@
     "code-tidying@melodic-software": false,
     "superpowers@superpowers-marketplace": false,
     "mattpocock-skills@mattpocock": true,
-    "ponytail@ponytail": true
+    "ponytail@ponytail": true,
+    "i-have-adhd@i-have-adhd": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
@@ -57,13 +57,6 @@
       },
       "autoUpdate": true
     },
-    "caveman": {
-      "source": {
-        "source": "github",
-        "repo": "JuliusBrussee/caveman"
-      },
-      "autoUpdate": true
-    },
     "context7-marketplace": {
       "source": {
         "source": "github",
@@ -90,6 +83,12 @@
         "source": "github",
         "repo": "DietrichGebert/ponytail"
       }
+    },
+    "i-have-adhd": {
+      "source": {
+        "source": "github",
+        "repo": "ayghri/i-have-adhd"
+      }
     }
   },
   "feedbackDrafts": "off",
@@ -102,6 +101,7 @@
   "skipWorkflowUsageWarning": true,
   "theme": "auto",
   "autoCompactEnabled": true,
+  "autoContinueAtUsageLimit": true,
   "inputNeededNotifEnabled": true,
   "agentPushNotifEnabled": true
 }
