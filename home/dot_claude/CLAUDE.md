@@ -18,9 +18,11 @@ A user example ("for example", "like", "such as") names one instance of a class.
 
 ## Subagent model and effort
 
-When dispatching a subagent, choose its `model` and `effort` deliberately for that subtask instead of leaving the defaults. Weigh how much reasoning it needs against cost and speed, and decide per dispatch. You have standing permission to set `effort` this way.
+When dispatching a subagent, choose its agent type and `effort` deliberately instead of leaving the defaults. Weigh how much reasoning it needs against cost and speed.
 
-If an active skill, mode or plugin gives its own rule for subagent models or effort, follow that rule instead.
+- **Effort**: pass `effort: "lo" | "med" | "hi"` per dispatch. You have standing permission to set `effort` this way.
+- **Model routing**: omp routes subagent models by specialist agent type (`scout`, `sonic`, `reviewer`, `task`) or `modelRoles` in `~/.omp/agent/config.yml`. The `task` tool rejects inline `model` arguments (accepted only for `seance`). Do not pass `model` to `task`.
+- If an active skill, mode or plugin gives its own rule for subagent models or effort, follow that rule instead.
 
 ## Skills to use without being asked
 
@@ -84,7 +86,7 @@ Current bridges and exceptions:
 
 | Plugin | In omp |
 | --- | --- |
-| superpowers | Skills via the claude provider; `extensions:` in omp's config loads its `.pi` bootstrap, which stands in for the SessionStart hook |
+| superpowers | Skills via the claude provider; `superpowers-bridge.ts` loads the bootstrap with omp-native tool mapping (`task`, `todo`, `read skill://`) |
 |i-have-adhd|`i-have-adhd-bridge.ts` injects the ruleset, tracks state across turns and handles `/i-have-adhd` commands and subagents|
 | impeccable | `impeccable-bridge.ts` runs the plugin's hook script after edits and at session start/stop |
 | context7 | MCP server `context7:context7`; needs `/mcp reauth context7:context7` once per machine |

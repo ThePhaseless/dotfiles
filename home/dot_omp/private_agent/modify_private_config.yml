@@ -24,11 +24,10 @@ skills:
   enableAgentsProject: false
 marketplace:
   autoUpdate: auto
-extensions:
-  - ~/.claude/plugins/marketplaces/superpowers-dev
 disabledExtensions:
   - skill:claude-security
 task:
+  enableEffort: true
   disabledAgents:
     - claude-security
     - explore
