@@ -50,8 +50,6 @@ for _dotenv_brew in /opt/homebrew /home/linuxbrew/.linuxbrew; do
         break
     fi
 done
-[ -d "$HOME/.volta" ] && export VOLTA_HOME="$HOME/.volta"
-[ -d "$HOME/.bun" ] && export BUN_INSTALL="$HOME/.bun"
 
 # Without it, `mise activate` in a terminal lets PATH edits made after activation
 # outrank mise's tools, so interactive shells resolve differently.
@@ -66,18 +64,9 @@ if [ -z "${DOTENV_PATH:-}" ]; then
         "$HOME/.local/share/JetBrains/Toolbox/scripts" \
         "$HOME/Library/Application Support/JetBrains/Toolbox/scripts" \
         "$HOME/.lmstudio/bin" \
-        "$HOME/.duckdb/cli/latest" \
-        "$HOME/.opencode/bin" \
-        "$HOME/.devcontainers/bin" \
         "$HOME/.docker/bin" \
-        "$HOME/.npm/global-modules/bin" \
-        "$HOME/dev/go/bin" \
-        "$HOME/go/bin" \
         "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/sbin}" \
         "${HOMEBREW_PREFIX:+$HOMEBREW_PREFIX/bin}" \
-        "$HOME/.volta/bin" \
-        "$HOME/.bun/bin" \
-        "$HOME/.cargo/bin" \
         "$HOME/.local/share/mise/shims" \
         "$HOME/.local/bin"
     do
