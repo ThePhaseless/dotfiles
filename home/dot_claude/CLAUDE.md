@@ -8,6 +8,19 @@
 - Run independent subagents in parallel. Give each a self-contained brief: goal, relevant paths, constraints, and what to report back.
 - Check a subagent's output before acting on it.
 
+### Pipeline for non-trivial changes
+
+A change is non-trivial when it spans several files or components, changes behaviour that other code or people rely on, or needs a design choice. Run each one through four stages, each a fresh subagent:
+
+1. Plan: write the plan.
+2. Plan review: check the plan against the request and the code. Revise and review again until it passes.
+3. Implement: carry out the approved plan.
+4. Implementation review: review the diff against the plan. Send every issue to a fresh implementer, then review again. Done when a review finds no issues.
+
+Run it for: a new feature, script or plugin with its omp bridge; a bug whose cause is still unknown; a refactor across modules; a change to a data pipeline, schema or scraper output.
+
+Do these directly instead: a one-file edit with an obvious fix (typo, renamed variable, a config value); a single command; answering a question; accepting or reverting a diff that is already known.
+
 ## Waiting in scripts
 
 Every wait in a script, loop or monitor is event-driven: it polls the real signal every 1–2 s and exits the moment the work succeeds, a failure shows (an error line, a non-zero exit, the watched process gone), or a short deadline passes. Set the deadline to the step's usual duration plus a small margin, seconds to a few minutes, and print which of the three ended the wait. After a timeout, inspect the state and change something before you wait again.
