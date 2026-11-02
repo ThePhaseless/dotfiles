@@ -15,7 +15,7 @@ A change is non-trivial when it spans several files or components, changes behav
 1. Plan: write the plan.
 2. Plan review: check the plan against the request and the code. Revise and review again until it passes.
 3. Implement: carry out the approved plan.
-4. Implementation review: review the diff against the plan. Send every issue to a fresh implementer, then review again. Done when a review finds no issues.
+4. Implementation review: two fresh subagents review the diff. One checks it against the plan. The other is a blind review: it gets the diff and the repo, never the plan, and checks every environment and project the code runs in, partial failures (one replica, consumer or tenant, not all), noise (alerts, logs, retries) and the file's own conventions. Send every issue from either review to a fresh implementer, then run both again. Done when both find no issues; open the PR only after that.
 
 Run it for: a new feature, script or plugin with its omp bridge; a bug whose cause is still unknown; a refactor across modules; a change to a data pipeline, schema or scraper output.
 
