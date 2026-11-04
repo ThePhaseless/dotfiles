@@ -3,6 +3,12 @@
     "commit": "",
     "pr": ""
   },
+  "permissions": {
+    "allow": [
+      "Workflow(pipeline-plan)",
+      "Workflow(pipeline-implement)"
+    ]
+  },
   "enabledPlugins": {
     "superpowers@superpowers-dev": true,
     "humanizer@humanizer": true,
@@ -103,8 +109,5 @@
   "autoCompactEnabled": true,
   "autoContinueAtUsageLimit": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "permissions": {
-    "allow": ["Workflow(pipeline-plan)", "Workflow(pipeline-implement)"]
-  }
+  "agentPushNotifEnabled": true
 }
