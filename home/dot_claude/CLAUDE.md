@@ -3,9 +3,9 @@
 ## Orchestration
 
 - Small tasks (a quick answer, a one-file edit, a single command): do them directly.
-- Medium and large tasks or questions: act as the orchestrator. Plan, split the work into independent pieces, hand them to subagents, then integrate and check the results yourself. Keep your own context for decisions, not raw file contents or search output.
+- Medium and large tasks or questions: act as the orchestrator. Plan, hand the work to subagents, then integrate and check the results yourself. Keep your own context for decisions, not raw file contents or search output.
 - Side tasks (searching the codebase, reading docs, chasing a tangent, long-running checks): hand them to a subagent even during small work, and keep going on the main thread.
-- Run independent subagents in parallel. Give each a self-contained brief: goal, relevant paths, constraints, and what to report back.
+- Split the work into independent units at the start, and map what each unit needs first and which files it touches. A unit is one subagent or one whole pipeline (below). Dispatch every ready unit in the same turn, and each later one the moment its last dependency lands. Units running in one tree touch disjoint files; units that share a file run in order. Give each subagent a self-contained brief: goal, relevant paths, constraints, and what to report back.
 - Check a subagent's output before acting on it.
 
 ### Pipeline for non-trivial changes
@@ -13,13 +13,23 @@
 A change is non-trivial when it spans several files or components, changes behaviour that other code or people rely on, or needs a design choice. Run each one through four stages, each a fresh subagent:
 
 1. Plan: write the plan.
-2. Plan review: check the plan against the request and the code. Revise and review again until it passes.
+2. Plan review: check the plan against the request and the code. Revise and review again until it passes; when a revision makes no progress, bring the open issues to the user.
 3. Implement: carry out the approved plan.
-4. Implementation review: two fresh subagents review the diff and tag every finding blocker, major or minor. One checks it against the plan. The other is a blind review: it gets the diff and the repo, never the plan, and checks every environment and project the code runs in, partial failures (one replica, consumer or tenant, not all), noise (alerts, logs, retries) and the file's own conventions. Send every finding to a fresh implementer. Done when a round has no blocker or major; minor fixes ship without another review. After a fix round that had a blocker or major, run both again on the delta since their last pass, give them the findings already settled, and have them report only new or regressed ones. After 3 rounds with a blocker or major still open, stop and bring the open findings to the user. Open the PR only after that.
+4. Implementation review: two fresh subagents review the diff and tag every finding blocker, major or minor. One checks it against the plan. The other is a blind review: it gets the diff and the repo, never the plan, and checks every environment and project the code runs in, partial failures (one replica, consumer or tenant, not all), noise (alerts, logs, retries) and the file's own conventions. Send every finding to a fresh implementer. Done when a round has no blocker or major; minor fixes ship without another review. After a fix round that had a blocker or major, run both again on the delta since their last pass, give them the findings already settled, and have them report only new or regressed ones. Keep going until no blocker or major is open. When a fix round makes no progress (nothing changed, a finding declined, or a fixed finding keeps returning), stop and bring the open findings to the user. Open the PR only after that.
+
+Each non-trivial change runs its own pipeline as a unit beside the others; items that need no pipeline stay out of its plan. While a change is being implemented, its working tree belongs to that change alone: any other work in the same repo gets its own branch and a git worktree under `.worktrees/` in that repo, listed in `$(git rev-parse --git-common-dir)/info/exclude`.
+
+A subagent briefed with one stage does that stage itself and returns its result; the orchestrator starts every stage.
+
+In Claude Code, run the pipeline through two saved workflows. The user has asked for them to run whenever this pipeline applies, with no further opt-in. `pipeline-plan` runs stages 1–2. When it returns questions or unresolved issues, bring them to the user and rerun it with the plan, the issues and the answers. When it returns `ready`, check the plan and approve it yourself; the user sees the plan only when it came with questions. Then pass it to `pipeline-implement`, which runs stages 3–4 and returns `done` or the open findings to bring to the user. Before calling the change done, run the `notRun` steps that the repo's instructions already allow (such as `chezmoi apply`) and bring the rest (deploy, push, migration) to the user. Any other status: bring it and the run log to the user. Where there is no Workflow tool (omp) or the change is outside a git repo, run the same stages with subagents.
 
 Run it for: a new feature, script or plugin with its omp bridge; a bug whose cause is still unknown; a refactor across modules; a change to a data pipeline, schema or scraper output.
 
 Do these directly instead: a one-file edit with an obvious fix (typo, renamed variable, a config value); a single command; answering a question; accepting or reverting a diff that is already known.
+
+## Commit attribution
+
+The git author is the only attribution. A commit message or PR body ends on its own content, with no `Co-Authored-By: Claude` or "Generated with Claude Code" lines, even where the repo history carries them. Subagent briefs that dictate a commit message follow the same rule, and a review treats a missing trailer as correct.
 
 ## Waiting in scripts
 
@@ -73,6 +83,7 @@ Many files in `~` are generated by chezmoi from the repo at `~/.local/share/chez
 | Machine-specific values and secrets | `~/.env.local` | Untracked; edit in place |
 | Claude Code settings, plugins, marketplaces | `~/.claude/settings.json` | Claude Code rewrites it; run `chezmoi re-add ~/.claude/settings.json` to save changes back |
 | Personal skills | `~/.claude/skills/` | Untracked: some are work-specific and this repo is public. Claude Code and omp both load them |
+| Saved workflows | `~/.claude/workflows/` | Source `home/dot_claude/workflows/` |
 | Global agent instructions, including this guide to `~` | `~/.claude/CLAUDE.md` | Claude Code and omp load it in every directory. omp never reads `~/AGENTS.md` or `~/CLAUDE.md`, so rules for all of `~` go here |
 | omp settings | `~/.omp/agent/config.yml` | omp rewrites it. `modelRoles` (`/model`) stays local and untracked; other changes go into the source by hand, `re-add` cannot save a modify template |
 | omp provider keys | `~/.omp/agent/models.yml` | Names env vars only; the keys sit in `~/.env.local` (`OMP_ANTHROPIC_API_KEY`). Never export `ANTHROPIC_API_KEY` there: Claude Code would offer to bill it instead of the subscription |

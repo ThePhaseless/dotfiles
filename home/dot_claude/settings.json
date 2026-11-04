@@ -103,5 +103,8 @@
   "autoCompactEnabled": true,
   "autoContinueAtUsageLimit": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "permissions": {
+    "allow": ["Workflow(pipeline-plan)", "Workflow(pipeline-implement)"]
+  }
 }

@@ -8,9 +8,9 @@ This directory is the chezmoi **source**. Files in `~` are generated **targets**
 2. For shell files, run `zsh -n <file>` (or `sh -n` for `dot_env.tmpl` after `chezmoi execute-template < dot_env.tmpl`).
 3. Run `chezmoi diff <target>` and confirm only your change shows up.
 4. Run `chezmoi apply <target>` — always with explicit targets, see "Target drift".
-5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach.
+5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach. After editing a workflow in `home/dot_claude/workflows/`, run `node check-workflows.mjs`; done when no line prints `FAIL`.
 
-Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. The source state lives in `home/` (set by `.chezmoiroot`); every source name in this file is relative to it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`, `chezmoi-auto-update.sh`) sit at the repo root, outside `home/`, so they are never applied. `home/.chezmoiignore` guards target paths that must never be tracked.
+Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. The source state lives in `home/` (set by `.chezmoiroot`); every source name in this file is relative to it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`, `check-workflows.mjs`, `chezmoi-auto-update.sh`) sit at the repo root, outside `home/`, so they are never applied. `home/.chezmoiignore` guards target paths that must never be tracked.
 
 ## Where a setting belongs
 
