@@ -21,6 +21,45 @@ fi
 
 [[ -o interactive ]] || return 0
 
+_ssh_login=0
+[[ -n $SSH_TTY && -z $TMUX && $TERM != dumb && $TERM_PROGRAM != vscode ]] && _ssh_login=1
+
+# ssh logins attach to one persistent session and take it over (-D detaches
+# other clients); detaching or a dropped link ends only ssh.
+# Opt out: ssh -t host 'TMUX_AUTO=0 zsh -l'
+if (( _ssh_login )) && [[ ${TMUX_AUTO:-1} != 0 ]] && command -v tmux >/dev/null; then
+    # A client TERM this host has no terminfo for (xterm-ghostty on macOS) makes tmux refuse to start.
+    _tmux_term=$TERM
+    infocmp "$_tmux_term" >/dev/null 2>&1 || _tmux_term=xterm-256color
+    TERM=$_tmux_term tmux new-session -A -D -s main && exit   # not exec: if tmux fails, keep this shell
+    unset _tmux_term
+fi
+
+# Warn, at the first prompt, when sessions here will not survive. Inside tmux
+# the status bar shows linger instead (dot_tmux.conf). TMUX_WARN=0 hides both.
+_tmux_warn=()
+if [[ ${TMUX_WARN:-1} != 0 && -z $TMUX && $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
+    if ! command -v tmux >/dev/null; then
+        (( _ssh_login )) && _tmux_warn+=("not installed, so this ssh session ends if the connection drops.")
+    else
+        (( _ssh_login )) && _tmux_warn+=("not attached, so this ssh session ends if the connection drops.")
+        # Without linger, systemd stops user@.service after the last logout and kills the tmux panes in it.
+        [[ -d /run/systemd/system && ! -e /var/lib/systemd/linger/${USER:-$(id -un)} ]] &&
+            _tmux_warn+=("linger is off, so sessions end at your last logout. Run: loginctl enable-linger")
+    fi
+fi
+if (( $#_tmux_warn )); then
+    _tmux_warn_precmd() {
+        local m
+        for m in $_tmux_warn; do print -P "%F{yellow}[tmux]%f $m %F{8}Hide: echo 'export TMUX_WARN=0' >> ~/.env.local%f"; done
+        add-zsh-hook -d precmd _tmux_warn_precmd
+        unset _tmux_warn
+    }
+    autoload -Uz add-zsh-hook
+    add-zsh-hook precmd _tmux_warn_precmd
+fi
+unset _ssh_login
+
 init_chezmoi() {
     if ! command -v chezmoi &>/dev/null; then
         return
@@ -237,11 +276,24 @@ autoload -Uz add-zsh-hook
 add-zsh-hook chpwd autovenv
 autovenv
 
+# A tmux pane keeps the SSH_AUTH_SOCK of the login that created it, and a
+# forwarded agent (ssh -A) dies with that connection; its socket file can stay
+# behind. Before each command, follow the socket tmux got from the latest attach.
+if [[ -n $TMUX ]]; then
+    _tmux_agent_refresh() {
+        # Local agents (desktop, launchd) outlive logins; only forwarded or missing ones need this.
+        [[ -S ${SSH_AUTH_SOCK:-} && $SSH_AUTH_SOCK != (/tmp/ssh-*|*/.ssh/agent/*) ]] && return
+        local line=$(tmux show-environment SSH_AUTH_SOCK 2>/dev/null)
+        [[ $line == SSH_AUTH_SOCK=* && -S ${line#*=} ]] && export SSH_AUTH_SOCK=${line#*=}
+    }
+    add-zsh-hook preexec _tmux_agent_refresh
+fi
+
 if [[ $error_occurred -ne 0 ]]; then
     echo "An error occurred during initialization. Please check the output above."
 fi
 
-if [ -f /var/run/motd.dynamic ]; then
+if [[ -f /var/run/motd.dynamic && -z $TMUX ]]; then
     reset
     cat /var/run/motd.dynamic
 fi
