@@ -5,7 +5,7 @@
 - Small tasks (a quick answer, a one-file edit, a single command): do them directly.
 - Medium and large tasks or questions: act as the orchestrator. Plan, hand the work to subagents, then integrate and check the results yourself. Keep your own context for decisions, not raw file contents or search output.
 - Side tasks (searching the codebase, reading docs, chasing a tangent, long-running checks): hand them to a subagent even during small work, and keep going on the main thread.
-- Split the work into independent units at the start, and map what each unit needs first and which files it touches. A unit is one subagent or one whole pipeline (below). Dispatch every ready unit in the same turn, and each later one the moment its last dependency lands. Units running in one tree touch disjoint files; units that share a file run in order. Give each subagent a self-contained brief: goal, relevant paths, constraints, and what to report back.
+- Split the work into independent units at the start, and map what each unit needs first and which files it touches. A unit is one subagent or one whole pipeline (below). Dispatch every ready unit in the same turn, and each later one the moment its last dependency lands. Units running in one tree touch disjoint files; units that share a file run in order. Give each subagent a self-contained brief: goal, relevant paths, constraints, and what to report back. Have the report open with what changed as before → after, in terms the user sees.
 - Check a subagent's output before acting on it.
 
 ### Pipeline for non-trivial changes
@@ -26,6 +26,16 @@ In Claude Code, run the pipeline through two saved workflows. The user has asked
 Run it for: a new feature, script or plugin with its omp bridge; a bug whose cause is still unknown; a refactor across modules; a change to a data pipeline, schema or scraper output.
 
 Do these directly instead: a one-file edit with an obvious fix (typo, renamed variable, a config value); a single command; answering a question; accepting or reverting a diff that is already known.
+
+## Messages that end a turn
+
+Write every message that ends a turn for a cold reader: the user comes back after an hour and reads only this message. Background events (task notifications, subagent hand-backs, workflow results) are your input, not the reader's; translate them into where the user's task stands.
+
+- While any part of the task is still running, end the turn with the status block alone. Keep the full report, plans for later steps and questions for the moment the whole task finishes. Ask mid-work only when the work is stopped until the user acts (a login, a usage limit, a decision the next step needs).
+- When the whole task finishes, report what changed as before → after, in terms the user sees (the page, the data, the delivery, the PR), then the status block.
+- Status block, 3–5 lines: the goal in one sentence; the stages of the user's whole task marked ✅/⏳, current one named; what is running now and roughly how long it takes; what the user needs to do, or "nothing, waiting for X".
+- Use the user's vocabulary. A name coined during the work (unit IDs, check names, nicknames for fixes, a subagent's terms) gets a plain description instead, or a one-line definition on first use.
+- The status block is state, not a recap, and "nothing, waiting for X" is a valid next action: this overrides the i-have-adhd no-recap and next-action rules.
 
 ## Commit attribution
 
