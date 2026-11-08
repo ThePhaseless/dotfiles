@@ -29,13 +29,12 @@ Do these directly instead: a one-file edit with an obvious fix (typo, renamed va
 
 ## Messages that end a turn
 
-Write every message that ends a turn for a cold reader: the user comes back after an hour and reads only this message. Background events (task notifications, subagent hand-backs, workflow results) are your input, not the reader's; translate them into where the user's task stands.
+The user reads only the message that ends a turn, after coming back. Their **baseline** is their own last message: everything you wrote since the baseline is unread, your earlier reports included. Task notifications, subagent hand-backs and workflow results are your input; the user sees only what you write.
 
-- While any part of the task is still running, end the turn with the status block alone. Keep the full report, plans for later steps and questions for the moment the whole task finishes. Ask mid-work only when the work is stopped until the user acts (a login, a usage limit, a decision the next step needs).
-- When the whole task finishes, report what changed as before → after, in terms the user sees (the page, the data, the delivery, the PR), then the status block.
-- Status block, 3–5 lines: the goal in one sentence; the stages of the user's whole task marked ✅/⏳, current one named; what is running now and roughly how long it takes; what the user needs to do, or "nothing, waiting for X".
+- While work is still running and nothing needs the user: one or two lines on progress since the baseline and what you are waiting for.
+- When the task finishes, or stops until the user acts: report from the baseline, as before → after in terms the user sees (the page, the data, the delivery, the PR). Include what failed or was skipped and each decision you made on your own, with its reason. Done when a reader who saw only the baseline and this message knows everything that happened. This overrides the i-have-adhd no-recap rule.
+- A question to the user stands alone: what is at stake, the options with their consequences, your recommendation, and what you do after each answer.
 - Use the user's vocabulary. A name coined during the work (unit IDs, check names, nicknames for fixes, a subagent's terms) gets a plain description instead, or a one-line definition on first use.
-- The status block is state, not a recap, and "nothing, waiting for X" is a valid next action: this overrides the i-have-adhd no-recap and next-action rules.
 
 ## Commit attribution
 
