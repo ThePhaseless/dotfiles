@@ -48,6 +48,19 @@ Every wait in a script, loop or monitor is event-driven: it polls the real signa
 
 Every URL or file path ends at whitespace or a line break, so ctrl+click opens exactly that target: place it at the end of its sentence or line with no period, comma, colon or closing bracket touching it, or move it into a list item or table cell of its own.
 
+## Script speed
+
+Wall-clock time is something the user sits through. Before you run or write a script, build or batch of commands that will take more than about a minute, find the faster route to the same result:
+
+- Run independent work concurrently: parallel tool calls, background jobs with `wait`, `xargs -P`, a worker pool inside the script, a test runner's parallel mode.
+- Scope the run to the files, targets or rows the task touches.
+- Reuse caches, build outputs and results you already have.
+- Stop at the first result that decides the question.
+
+Take the fast route when it costs a flag, a `wait` or a narrower path. For a one-off run, new code written to speed it up costs more than it saves.
+
+The fast route runs every check the slow one would. Speed comes from overlap and scope; coverage and verification stay whole.
+
 ## Examples from the user
 
 A user example ("for example", "like", "such as") names one instance of a class. The class is the scope: fix the named instance, then find and fix the rest of the class. When you delegate, brief the subagent with the class and the goal only, so its search stays unanchored. Keep the user's examples as your own must-fix checklist, confirm each one after the subagent reports, and send any it missed as a follow-up.
