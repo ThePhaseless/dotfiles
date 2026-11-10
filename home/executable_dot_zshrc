@@ -48,7 +48,8 @@ if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &
 fi
 
 # Warn, at the first prompt, when sessions here will not survive. Inside tmux
-# the status bar shows linger instead (dot_tmux.conf). TMUX_WARN=0 hides both.
+# the status bar shows linger instead (dot_tmux.conf); a missing fzf shows in
+# both. TMUX_WARN=0 hides all of them.
 _tmux_warn=()
 if [[ ${TMUX_WARN:-1} != 0 && -z $TMUX && $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
     if ! command -v tmux >/dev/null; then
@@ -60,6 +61,9 @@ if [[ ${TMUX_WARN:-1} != 0 && -z $TMUX && $TERM != dumb ]]; then   # dumb: Emacs
             _tmux_warn+=("linger is off, so sessions end at your last logout. Run: loginctl enable-linger")
     fi
 fi
+# Inside tmux too, since every terminal runs in it: prefix + ? needs fzf (dot_tmux.conf).
+[[ ${TMUX_WARN:-1} != 0 && $TERM != dumb ]] && command -v tmux >/dev/null && ! command -v fzf >/dev/null &&
+    _tmux_warn+=("fzf is not installed, so prefix + ? shows the plain key list instead of the tmux-fzf search.")
 if (( $#_tmux_warn )); then
     _tmux_warn_precmd() {
         local m
