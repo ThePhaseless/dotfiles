@@ -47,32 +47,38 @@ if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &
     unset _tmux_term _tmux_free _tmux_args
 fi
 
-# Warn, at the first prompt, when sessions here will not survive. Inside tmux
-# the status bar shows linger instead (dot_tmux.conf); a missing fzf shows in
-# both. TMUX_WARN=0 hides all of them.
-_tmux_warn=()
-if [[ ${TMUX_WARN:-1} != 0 && -z $TMUX && $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
-    if ! command -v tmux >/dev/null; then
-        (( _ssh_login )) && _tmux_warn+=("not installed, so this ssh session ends if the connection drops.")
-    else
-        (( _ssh_login )) && _tmux_warn+=("not attached, so this ssh session ends if the connection drops.")
-        # Without linger, systemd stops user@.service after the last logout and kills the tmux panes in it.
-        [[ -d /run/systemd/system && ! -e /var/lib/systemd/linger/${USER:-$(id -un)} ]] &&
-            _tmux_warn+=("linger is off, so sessions end at your last logout. Run: loginctl enable-linger")
+# Notices at the first prompt, each with its own switch (set it to 0 in ~/.env.local):
+#   WARN_SSH     an ssh login outside tmux ends if the connection drops
+#   WARN_LINGER  linger is off, so systemd kills the tmux panes after the last
+#                logout; inside tmux the status bar shows it instead (dot_tmux.conf)
+#   WARN_FZF     fzf is missing, so prefix + ? keeps the plain key list (dot_tmux.conf)
+_prompt_warn=()   # triples: label, switch, message
+if [[ $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
+    if [[ ${WARN_SSH:-1} != 0 && -z $TMUX ]] && (( _ssh_login )); then
+        if command -v tmux >/dev/null; then
+            _prompt_warn+=(tmux WARN_SSH "not attached, so this ssh session ends if the connection drops.")
+        else
+            _prompt_warn+=(tmux WARN_SSH "not installed, so this ssh session ends if the connection drops.")
+        fi
     fi
+    # Without linger, systemd stops user@.service after the last logout and kills the tmux panes in it.
+    [[ ${WARN_LINGER:-1} != 0 && -z $TMUX && -d /run/systemd/system && ! -e /var/lib/systemd/linger/${USER:-$(id -un)} ]] &&
+        command -v tmux >/dev/null &&
+        _prompt_warn+=(tmux WARN_LINGER "linger is off, so sessions end at your last logout. Run: loginctl enable-linger")
+    [[ ${WARN_FZF:-1} != 0 ]] && command -v tmux >/dev/null && ! command -v fzf >/dev/null &&
+        _prompt_warn+=(fzf WARN_FZF "not installed, so prefix + ? shows the plain key list instead of the tmux-fzf search.")
 fi
-# Inside tmux too, since every terminal runs in it: prefix + ? needs fzf (dot_tmux.conf).
-[[ ${TMUX_WARN:-1} != 0 && $TERM != dumb ]] && command -v tmux >/dev/null && ! command -v fzf >/dev/null &&
-    _tmux_warn+=("fzf is not installed, so prefix + ? shows the plain key list instead of the tmux-fzf search.")
-if (( $#_tmux_warn )); then
-    _tmux_warn_precmd() {
-        local m
-        for m in $_tmux_warn; do print -P "%F{yellow}[tmux]%f $m %F{8}Hide: echo 'export TMUX_WARN=0' >> ~/.env.local%f"; done
-        add-zsh-hook -d precmd _tmux_warn_precmd
-        unset _tmux_warn
+if (( $#_prompt_warn )); then
+    _prompt_warn_precmd() {
+        local label var msg
+        for label var msg in $_prompt_warn; do
+            print -P "%F{yellow}[$label]%f $msg %F{8}Hide: echo 'export $var=0' >> ~/.env.local%f"
+        done
+        add-zsh-hook -d precmd _prompt_warn_precmd
+        unset _prompt_warn
     }
     autoload -Uz add-zsh-hook
-    add-zsh-hook precmd _tmux_warn_precmd
+    add-zsh-hook precmd _prompt_warn_precmd
 fi
 unset _ssh_login
 
