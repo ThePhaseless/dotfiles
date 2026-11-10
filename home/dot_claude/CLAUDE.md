@@ -44,6 +44,10 @@ The git author is the only attribution. A commit message or PR body ends on its 
 
 Every wait in a script, loop or monitor is event-driven: it polls the real signal every 1–2 s and exits the moment the work succeeds, a failure shows (an error line, a non-zero exit, the watched process gone), or a short deadline passes. Set the deadline to the step's usual duration plus a small margin, seconds to a few minutes, and print which of the three ended the wait. After a timeout, inspect the state and change something before you wait again.
 
+## Links and paths in replies
+
+Every URL or file path ends at whitespace or a line break, so ctrl+click opens exactly that target: place it at the end of its sentence or line with no period, comma, colon or closing bracket touching it, or move it into a list item or table cell of its own.
+
 ## Examples from the user
 
 A user example ("for example", "like", "such as") names one instance of a class. The class is the scope: fix the named instance, then find and fix the rest of the class. When you delegate, brief the subagent with the class and the goal only, so its search stays unanchored. Keep the user's examples as your own must-fix checklist, confirm each one after the subagent reports, and send any it missed as a follow-up.
