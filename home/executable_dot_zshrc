@@ -22,17 +22,29 @@ fi
 [[ -o interactive ]] || return 0
 
 _ssh_login=0
-[[ -n $SSH_TTY && -z $TMUX && $TERM != dumb && $TERM_PROGRAM != vscode ]] && _ssh_login=1
+[[ -n $SSH_TTY && -z $TMUX ]] && _ssh_login=1
 
-# ssh logins attach to one persistent session and take it over (-D detaches
-# other clients); detaching or a dropped link ends only ssh.
-# Opt out: ssh -t host 'TMUX_AUTO=0 zsh -l'
-if (( _ssh_login )) && [[ ${TMUX_AUTO:-1} != 0 ]] && command -v tmux >/dev/null; then
+# Terminals start in tmux: reattach a detached session, else start a new one.
+# Other clients are never detached. An ssh login from inside tmux (TERM tmux* or
+# screen*) keeps a plain shell, so tmux does not nest.
+# Leaving tmux (exit, detach) closes the terminal; when tmux fails or
+# crashes (exit status 1) the shell stays. Editor terminals keep a plain shell.
+# Opt out: echo 'export TMUX_AUTO=0' >> ~/.env.local, or per login
+# ssh -t host 'TMUX_AUTO=0 zsh -l'
+if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &&
+    [[ $_ssh_login == 0 || $TERM != (tmux|screen)* ]] &&
+    [[ $TERM_PROGRAM != (vscode|zed) && $TERMINAL_EMULATOR != JetBrains* ]] && command -v tmux >/dev/null; then
     # A client TERM this host has no terminfo for (xterm-ghostty on macOS) makes tmux refuse to start.
     _tmux_term=$TERM
     infocmp "$_tmux_term" >/dev/null 2>&1 || _tmux_term=xterm-256color
-    TERM=$_tmux_term tmux new-session -A -D -s main && exit   # not exec: if tmux fails, keep this shell
-    unset _tmux_term
+    _tmux_free=(${${(M)${(f)"$(tmux list-sessions -F '#{session_attached}:#{session_name}' 2>/dev/null)"}:#0:*}#0:})
+    if (( $#_tmux_free )); then
+        _tmux_args=(attach-session -t "=$_tmux_free[1]")
+    else
+        _tmux_args=(new-session)
+    fi
+    TERM=$_tmux_term tmux $_tmux_args && exit   # not exec: a failed tmux keeps this shell
+    unset _tmux_term _tmux_free _tmux_args
 fi
 
 # Warn, at the first prompt, when sessions here will not survive. Inside tmux
