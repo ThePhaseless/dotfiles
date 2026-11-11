@@ -109,5 +109,14 @@
   "autoCompactEnabled": true,
   "autoContinueAtUsageLimit": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true
+  "agentPushNotifEnabled": true,
+  "autoUpdatesChannel": "latest",
+  "pluginConfigs": {
+    "ponytail@ponytail": {
+      "options": {
+        "ledger": true,
+        "sendNames": true
+      }
+    }
+  }
 }

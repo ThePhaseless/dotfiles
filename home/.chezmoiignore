@@ -10,6 +10,13 @@
 .claude/downloads
 .claude/plugins
 .claude.json
+# per-machine permissions
+.claude/settings.local.json
+# ponytail plugin runtime files
+.claude/ponytail-statusline.ps1
+.claude/.ponytail-active
+.claude/.ponytail-statusline-nudged
+.claude/ponytail-modes
 
 # omp: only config is tracked; never state, caches or secrets
 .omp/agent/*.db
