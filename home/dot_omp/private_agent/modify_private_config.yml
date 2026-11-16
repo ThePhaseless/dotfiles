@@ -15,7 +15,7 @@ security_scan tool).
 The skills keys match Claude Code: read ~/.claude/skills, skip .agents/skills
 (user and project), which Claude Code never loads.
 */ -}}
-setupVersion: 2
+setupVersion: 3
 enabledProviders:
   - claude
 skills:
@@ -43,4 +43,8 @@ browser:
   headless: false
 {{- with regexFind `(?m)^modelRoles:.*(?:\n[ \t]+.*)*` .chezmoi.stdin }}
 {{ trimSuffix "\n" . }}
-{{- end -}}
+{{- end }}
+update:
+  auto: true
+extendedContext: true
+{{- /* no final newline, like omp */ -}}

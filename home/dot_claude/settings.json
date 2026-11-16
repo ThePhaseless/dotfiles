@@ -109,14 +109,7 @@
       "effortLevel": "high"
     }
   },
-  "tui": "fullscreen",
-  "skipWorkflowUsageWarning": true,
-  "theme": "auto",
-  "autoCompactEnabled": true,
-  "autoContinueAtUsageLimit": true,
-  "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "autoUpdatesChannel": "latest",
+  "advisorModel": "fable",
   "pluginConfigs": {
     "ponytail@ponytail": {
       "options": {
@@ -124,5 +117,27 @@
         "sendNames": true
       }
     }
+  },
+  "autoUpdatesChannel": "latest",
+  "tui": "fullscreen",
+  "skipWorkflowUsageWarning": true,
+  "theme": "auto",
+  "autoCompactEnabled": true,
+  "autoContinueAtUsageLimit": true,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash '/home/thephaseless/.claude/hooks/herdr-agent-state.sh' session",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
   }
 }
