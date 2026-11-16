@@ -133,7 +133,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash '/home/thephaseless/.claude/hooks/herdr-agent-state.sh' session",
+            "command": "f=\"$HOME/.claude/hooks/herdr-agent-state.sh\"; [ -f \"$f\" ] && bash \"$f\" session || true",
             "timeout": 10
           }
         ]
