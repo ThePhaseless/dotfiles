@@ -24,27 +24,23 @@ fi
 _ssh_login=0
 [[ -n $SSH_TTY && -z $TMUX ]] && _ssh_login=1
 
-# Terminals start in tmux: reattach a detached session, else start a new one.
-# Other clients are never detached. An ssh login from inside tmux (TERM tmux* or
-# screen*) keeps a plain shell, so tmux does not nest.
+# Terminals start in a new tmux session; a detached one is never reattached by
+# itself, the first prompt only names it (WARN_TMUX_RESUME).
+# An ssh login from inside tmux (TERM tmux* or screen*) keeps a plain shell, so
+# tmux does not nest.
 # Leaving tmux (exit, detach) closes the terminal; when tmux fails or
-# crashes (exit status 1) the shell stays. Editor terminals keep a plain shell.
+# crashes (exit status 1) the shell stays. Editor terminals and herdr-app
+# terminals (HC_TERMINAL_ID; herdr-core already keeps them alive) keep a plain shell.
 # Opt out: echo 'export TMUX_AUTO=0' >> ~/.env.local, or per login
 # ssh -t host 'TMUX_AUTO=0 zsh -l'
 if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &&
     [[ $_ssh_login == 0 || $TERM != (tmux|screen)* ]] &&
-    [[ $TERM_PROGRAM != (vscode|zed) && $TERMINAL_EMULATOR != JetBrains* ]] && command -v tmux >/dev/null; then
+    [[ $TERM_PROGRAM != (vscode|zed) && $TERMINAL_EMULATOR != JetBrains* && -z $HC_TERMINAL_ID ]] && command -v tmux >/dev/null; then
     # A client TERM this host has no terminfo for (xterm-ghostty on macOS) makes tmux refuse to start.
     _tmux_term=$TERM
     infocmp "$_tmux_term" >/dev/null 2>&1 || _tmux_term=xterm-256color
-    _tmux_free=(${${(M)${(f)"$(tmux list-sessions -F '#{session_attached}:#{session_name}' 2>/dev/null)"}:#0:*}#0:})
-    if (( $#_tmux_free )); then
-        _tmux_args=(attach-session -t "=$_tmux_free[1]")
-    else
-        _tmux_args=(new-session)
-    fi
-    TERM=$_tmux_term tmux $_tmux_args && exit   # not exec: a failed tmux keeps this shell
-    unset _tmux_term _tmux_free _tmux_args
+    TERM=$_tmux_term tmux new-session -e TMUX_NEW_SESSION=1 && exit   # not exec: a failed tmux keeps this shell
+    unset _tmux_term
 fi
 
 # Notices at the first prompt, each with its own switch (set it to 0 in ~/.env.local):
@@ -52,6 +48,7 @@ fi
 #   WARN_LINGER  linger is off, so systemd kills the tmux panes after the last
 #                logout; inside tmux the status bar shows it instead (dot_tmux.conf)
 #   WARN_FZF     fzf is missing, so prefix + ? keeps the plain key list (dot_tmux.conf)
+#   WARN_TMUX_RESUME  a new tmux session names the detached ones
 _prompt_warn=()   # triples: label, switch, message
 if [[ $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
     if [[ ${WARN_SSH:-1} != 0 && -z $TMUX ]] && (( _ssh_login )); then
@@ -67,7 +64,15 @@ if [[ $TERM != dumb ]]; then   # dumb: Emacs TRAMP parses the output
         _prompt_warn+=(tmux WARN_LINGER "linger is off, so sessions end at your last logout. Run: loginctl enable-linger")
     [[ ${WARN_FZF:-1} != 0 ]] && command -v tmux >/dev/null && ! command -v fzf >/dev/null &&
         _prompt_warn+=(fzf WARN_FZF "not installed, so prefix + ? shows the plain key list instead of the tmux-fzf search.")
+    if [[ ${WARN_TMUX_RESUME:-1} != 0 && -n $TMUX && -n $TMUX_NEW_SESSION ]]; then
+        tmux set-environment -u TMUX_NEW_SESSION   # only the session's first shell, not every new window
+        _tmux_detached=(${${(M)${(f)"$(tmux list-sessions -F '#{session_attached}:#{session_name}' 2>/dev/null)"}:#0:*}#0:})
+        (( $#_tmux_detached )) &&
+            _prompt_warn+=(tmux WARN_TMUX_RESUME "detached sessions: ${(j:, :)_tmux_detached}. Resume: tmux switch-client -t $_tmux_detached[1]")
+        unset _tmux_detached
+    fi
 fi
+unset TMUX_NEW_SESSION
 if (( $#_prompt_warn )); then
     _prompt_warn_precmd() {
         local label var msg
