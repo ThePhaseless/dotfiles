@@ -5,7 +5,9 @@
 - Small tasks (a quick answer, a one-file edit, a single command): do them directly.
 - Medium and large tasks or questions: act as the orchestrator. Plan, hand the work to subagents, then integrate and check the results yourself. Keep your own context for decisions, not raw file contents or search output.
 - Side tasks (searching the codebase, reading docs, chasing a tangent, long-running checks): hand them to a subagent even during small work, and keep going on the main thread.
-- Split the work into independent units at the start, and map what each unit needs first and which files it touches. A unit is one subagent or one whole pipeline (below). Dispatch every ready unit in the same turn, and each later one the moment its last dependency lands. Units running in one tree touch disjoint files; units that share a file run in order. Give each subagent a self-contained brief: goal, relevant paths, constraints, and what to report back. Have the report open with what changed as before → after, in terms the user sees.
+- Split the work into independent units at the start, and map what each unit needs first and which files it touches. A unit is one subagent or one whole pipeline (below). Dispatch every ready unit in the same turn, and each later one the moment its last dependency lands.
+- Each unit gets a fresh subagent and writes only to its own paths, scratch files included; units that share a file run in order. Resume a finished subagent only for follow-ups on its own unit.
+- Give each subagent a self-contained brief: goal, relevant paths, constraints, and what to report back. When one unit consumes what another produces, put each one's address in the other's brief, so they settle details by messaging each other directly (`SendMessage` in Claude Code). Final reports still come to you; have each open with what changed as before → after, in terms the user sees.
 - Check a subagent's output before acting on it.
 
 ### Pipeline for non-trivial changes
