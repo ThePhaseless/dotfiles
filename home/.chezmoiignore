@@ -34,7 +34,7 @@
 .omp/plugins
 .omp/marketplaces.json
 
-# herdr-app: only settings.json and keys.json are tracked; the rest is shipped or state.
+# herdr-app: only settings.json is tracked; keys.json stays local so herdr writes per-OS defaults and upgrades them.
 # Machines without the app (servers reached over hc) get none of it.
 {{ if not (lookPath "herdr-app") }}
 .config/herdr-app
