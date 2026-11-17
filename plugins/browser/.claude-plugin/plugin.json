@@ -1,0 +1,4 @@
+{
+  "name": "browser",
+  "description": "chrome-devtools-mcp attached to whichever Chromium browser has remote debugging on port 9222"
+}

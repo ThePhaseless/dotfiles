@@ -38,7 +38,8 @@
     "superpowers@superpowers-marketplace": false,
     "mattpocock-skills@mattpocock": true,
     "ponytail@ponytail": true,
-    "i-have-adhd@i-have-adhd": true
+    "i-have-adhd@i-have-adhd": true,
+    "browser@dotfiles": true
   },
   "extraKnownMarketplaces": {
     "superpowers-dev": {
@@ -101,6 +102,13 @@
         "source": "github",
         "repo": "ayghri/i-have-adhd"
       }
+    },
+    "dotfiles": {
+      "source": {
+        "source": "github",
+        "repo": "ThePhaseless/dotfiles"
+      },
+      "autoUpdate": true
     }
   },
   "feedbackDrafts": "off",

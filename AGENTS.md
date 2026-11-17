@@ -8,9 +8,9 @@ This directory is the chezmoi **source**. Files in `~` are generated **targets**
 2. For shell files, run `zsh -n <file>` (or `sh -n` for `dot_env.tmpl` after `chezmoi execute-template < dot_env.tmpl`).
 3. Run `chezmoi diff <target>` and confirm only your change shows up.
 4. Run `chezmoi apply <target>` — always with explicit targets, see "Target drift".
-5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach. After editing a workflow in `home/dot_claude/workflows/`, run `node check-workflows.mjs`; done when no line prints `FAIL`.
+5. Verify in a fresh shell: `env -u DOTENV_LOADED zsh -i -c '<check>'`. Done when the check prints the expected value in that fresh shell. For PATH or `~/.env` changes, done when `sh check-shells.sh` prints `PASS` on every machine you can reach. After editing a workflow in `home/dot_claude/workflows/`, run `node check-workflows.mjs`; done when no line prints `FAIL`. After editing a plugin under `plugins/`, run `claude plugin validate .` and check `/mcp` lists it; done when both pass. Plugin changes reach machines only after a push.
 
-Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. The source state lives in `home/` (set by `.chezmoiroot`); every source name in this file is relative to it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`, `check-workflows.mjs`, `chezmoi-auto-update.sh`) sit at the repo root, outside `home/`, so they are never applied. `home/.chezmoiignore` guards target paths that must never be tracked.
+Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a Go template (data from `.chezmoi.toml.tmpl`, helpers like `lookPath`), `create_` writes the target once and never overwrites it. The source state lives in `home/` (set by `.chezmoiroot`); every source name in this file is relative to it. Repo-only files (this one, `README.md`, `install.sh`, `check-shells.sh`, `check-workflows.mjs`, `chezmoi-auto-update.sh`, `.claude-plugin/`, `plugins/`) sit at the repo root, outside `home/`, so they are never applied. `home/.chezmoiignore` guards target paths that must never be tracked.
 
 ## Where a setting belongs
 
@@ -24,6 +24,7 @@ Source name → target: `dot_x` → `~/.x`, `executable_` sets +x, `.tmpl` is a 
 | Claude Code settings and global instructions, including the agent guide for working anywhere in `~` | `dot_claude/settings.json`, `dot_claude/CLAUDE.md` | Claude Code; omp also reads `~/.claude/CLAUDE.md` (in every directory, unlike `~/AGENTS.md`, which it never reads) and Claude plugins |
 | omp settings | `dot_omp/private_agent/modify_private_config.yml` (modify template: keeps the local `modelRoles` block, written in omp's comment-free format) | omp |
 | omp bridges for Claude plugin hooks | `dot_omp/private_agent/extensions/*.ts` | omp, auto-loaded from `~/.omp/agent/extensions/` |
+| Claude Code + omp plugin owned by this repo (MCP server) | `plugins/<name>/` + `.claude-plugin/marketplace.json` (repo root, not applied) | Claude Code via marketplace `dotfiles` on GitHub after a push; omp via Claude's `installed_plugins.json` |
 
 Anything installed into Claude Code must also work in omp: see "Claude Code and omp parity" in `home/dot_claude/CLAUDE.md` (`~/.claude/CLAUDE.md`) for what omp loads, how to bridge hooks, and the current exceptions. Keep that table current when you add, bridge or hide a plugin.
 

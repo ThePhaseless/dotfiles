@@ -1,0 +1,13 @@
+{
+  "name": "dotfiles",
+  "owner": {
+    "name": "ThePhaseless"
+  },
+  "plugins": [
+    {
+      "name": "browser",
+      "source": "./plugins/browser",
+      "description": "chrome-devtools-mcp attached to whichever Chromium browser has remote debugging on port 9222"
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "browser": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "chrome-devtools-mcp@1.13.0", "--wsEndpoint=ws://127.0.0.1:9222/devtools/browser"]
+    }
+  }
+}
