@@ -73,6 +73,7 @@ When dispatching a subagent, choose its agent type and `effort` deliberately ins
 
 - **Effort**: pass `effort: "lo" | "med" | "hi"` per dispatch. You have standing permission to set `effort` this way.
 - **Model routing**: omp routes subagent models by specialist agent type (`scout`, `sonic`, `reviewer`, `task`) or `modelRoles` in `~/.omp/agent/config.yml`. The `task` tool rejects inline `model` arguments (accepted only for `seance`). Do not pass `model` to `task`.
+- **Fable (Claude Code)**: Fable uses up the plan's usage faster than Opus, so subagents run on Opus by default. Pass `model: "fable"` only for a unit that is long and hard enough to stall Opus: a bug still unexplained after a first diagnosis, a design or refactor plan across modules, or an adversarial review of a risky change (security, data loss, migration). Leave `model` unset for the rest; pick `sonnet` or `haiku` for mechanical units.
 - If an active skill, mode or plugin gives its own rule for subagent models or effort, follow that rule instead.
 
 ## Skills to use without being asked
