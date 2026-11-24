@@ -56,9 +56,8 @@ fi
 # ssh runs with the terminal's environment, not the pane's, so a prefix such as
 # `VAR=x ssh host` does not reach it. Commands chained after it
 # (`ssh host && make`) run at once in the abandoned pane: use `command ssh` there.
-# ssh now sends the terminal's TERM (xterm-ghostty); for a host that lacks its
-# terminfo, use `command ssh host` (without these dotfiles it never starts its
-# own tmux anyway).
+# ssh sends TERM=xterm-256color, which every host has terminfo for (xterm-ghostty
+# is missing on most servers).
 # Opt out: echo 'export SSH_DETACH_TMUX=0' >> ~/.env.local; per call: command ssh host
 if [[ ${SSH_DETACH_TMUX:-1} != 0 && -n $TMUX && -n $TMUX_AUTO_SESSION && $TERM == (tmux|screen)* ]] &&
     [[ $(tmux show-environment TMUX_AUTO_SESSION 2>/dev/null) == TMUX_AUTO_SESSION=1 ]]; then   # session env: a nested server only inherits the pane variable
@@ -83,7 +82,7 @@ if [[ ${SSH_DETACH_TMUX:-1} != 0 && -n $TMUX && -n $TMUX_AUTO_SESSION && $TERM =
         # Destroy a lone pane's session once detached, unless another client watches it or jobs would die with it.
         [[ $info == 1:1:1 && ${#jobstates} == 0 ]] && one=1 && tmux set-option -t "$TMUX_PANE" destroy-unattached on
         # cd: relative -i/-F paths; if it fails ssh still runs from the client's cwd. exec: ssh's status becomes the client's.
-        tmux detach-client -E "cd -- ${(qq)PWD} 2>/dev/null; exec ssh ${(j: :)${(qq)@}}" && return 0
+        tmux detach-client -E "cd -- ${(qq)PWD} 2>/dev/null; TERM=xterm-256color exec ssh ${(j: :)${(qq)@}}" && return 0
         (( one )) && tmux set-option -u -t "$TMUX_PANE" destroy-unattached
         command ssh "$@"
     }
