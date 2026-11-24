@@ -31,6 +31,8 @@ _ssh_login=0
 # Leaving tmux (exit, detach) closes the terminal; when tmux fails or
 # crashes (exit status 1) the shell stays. Editor terminals and herdr-app
 # terminals (HC_TERMINAL_ID; herdr-core already keeps them alive) keep a plain shell.
+# The session is tagged TMUX_AUTO_SESSION (session environment), so the ssh
+# hand-off below recognises it.
 # Opt out: echo 'export TMUX_AUTO=0' >> ~/.env.local, or per login
 # ssh -t host 'TMUX_AUTO=0 zsh -l'
 if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &&
@@ -39,8 +41,52 @@ if [[ ${TMUX_AUTO:-1} != 0 && -z $TMUX && $TERM != dumb && -z $INSIDE_EMACS ]] &
     # A client TERM this host has no terminfo for (xterm-ghostty on macOS) makes tmux refuse to start.
     _tmux_term=$TERM
     infocmp "$_tmux_term" >/dev/null 2>&1 || _tmux_term=xterm-256color
-    TERM=$_tmux_term tmux new-session -e TMUX_NEW_SESSION=1 && exit   # not exec: a failed tmux keeps this shell
+    TERM=$_tmux_term tmux new-session -e TMUX_NEW_SESSION=1 -e TMUX_AUTO_SESSION=1 && exit   # not exec: a failed tmux keeps this shell
     unset _tmux_term
+fi
+
+# A bare `ssh host` typed in this terminal's own tmux replaces the local tmux
+# client, so the remote host gets the terminal's TERM and starts its own tmux,
+# which outlives a dropped connection. A one-pane session goes away with it;
+# larger ones stay detached. The window closes when ssh exits 0 and keeps a
+# local shell otherwise.
+# Skipped when this tmux is attached over ssh, for remote commands, for flags
+# that mean no shell (-N, -T, -W, ...), off a tty, and when more than one client
+# watches the session.
+# ssh runs with the terminal's environment, not the pane's, so a prefix such as
+# `VAR=x ssh host` does not reach it. Commands chained after it
+# (`ssh host && make`) run at once in the abandoned pane: use `command ssh` there.
+# ssh now sends the terminal's TERM (xterm-ghostty); for a host that lacks its
+# terminfo, use `command ssh host` (without these dotfiles it never starts its
+# own tmux anyway).
+# Opt out: echo 'export SSH_DETACH_TMUX=0' >> ~/.env.local; per call: command ssh host
+if [[ ${SSH_DETACH_TMUX:-1} != 0 && -n $TMUX && -n $TMUX_AUTO_SESSION && $TERM == (tmux|screen)* ]] &&
+    [[ $(tmux show-environment TMUX_AUTO_SESSION 2>/dev/null) == TMUX_AUTO_SESSION=1 ]]; then   # session env: a nested server only inherits the pane variable
+    ssh() {
+        local OPTIND=1 OPTARG opt info one=0
+        while getopts ':46AaCfGgKkMNnqsTtVvXxYyB:b:c:D:E:e:F:I:i:J:L:l:m:O:o:P:p:Q:R:S:W:w:' opt; do
+            case $opt in
+                ([fGNnOQsTVW:?]) command ssh "$@"; return ;;
+                (o) [[ ${(L)OPTARG} == (sessiontype|requesttty|forkafterauthentication|stdinnull|stdioforward|remotecommand)* ]] &&
+                    { command ssh "$@"; return } ;;
+            esac
+        done
+        # shortcut: options after the host (ssh host -p 22) count as a remote command and skip the hand-off; re-run getopts after the host if that matters.
+        # The client's SSH_CONNECTION in the session env, not the pane's stale copy: detaching there would drop a remote user out of tmux.
+        # One client only: the session env describes the last client to attach, which may not be the one that typed ssh.
+        if (( $# - OPTIND + 1 != 1 )) || [[ ! -t 0 || ! -t 1 ]] ||
+            [[ $(tmux show-environment -t "$TMUX_PANE" SSH_CONNECTION 2>/dev/null) == SSH_CONNECTION=* ]] ||
+            ! info=$(tmux display -p -t "$TMUX_PANE" '#{session_attached}:#{session_windows}:#{window_panes}' 2>/dev/null) ||
+            [[ ${info%%:*} != 1 ]]; then
+            command ssh "$@"; return
+        fi
+        # Destroy a lone pane's session once detached, unless another client watches it or jobs would die with it.
+        [[ $info == 1:1:1 && ${#jobstates} == 0 ]] && one=1 && tmux set-option -t "$TMUX_PANE" destroy-unattached on
+        # cd: relative -i/-F paths; if it fails ssh still runs from the client's cwd. exec: ssh's status becomes the client's.
+        tmux detach-client -E "cd -- ${(qq)PWD} 2>/dev/null; exec ssh ${(j: :)${(qq)@}}" && return 0
+        (( one )) && tmux set-option -u -t "$TMUX_PANE" destroy-unattached
+        command ssh "$@"
+    }
 fi
 
 # Notices at the first prompt, each with its own switch (set it to 0 in ~/.env.local):
@@ -395,4 +441,4 @@ if command -v bash >/dev/null 2>&1 && [[ -f $_dotfiles_updater ]]; then
 fi
 
 # bun completions
-[[ -s $HOME/.bun/_bun ]] \&\& source $HOME/.bun/_bun
+[[ -s $HOME/.bun/_bun ]] && source $HOME/.bun/_bun
