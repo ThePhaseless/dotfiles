@@ -2,8 +2,11 @@
   "mcpServers": {
     "browser": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "chrome-devtools-mcp@1.13.0", "--wsEndpoint=ws://127.0.0.1:9222/devtools/browser"]
+      "command": "sh",
+      "args": [
+        "-c",
+        "mode=--wsEndpoint=ws://127.0.0.1:9222/devtools/browser; curl -sf --noproxy '*' -o /dev/null --max-time 1 http://127.0.0.1:9222/json/version && mode=--browserUrl=http://127.0.0.1:9222; exec npx -y chrome-devtools-mcp@1.13.0 \"$mode\""
+      ]
     }
   }
 }
