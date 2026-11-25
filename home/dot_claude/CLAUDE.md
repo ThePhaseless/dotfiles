@@ -31,12 +31,36 @@ Do these directly instead: a one-file edit with an obvious fix (typo, renamed va
 
 ## Messages that end a turn
 
-The user reads only the message that ends a turn, after coming back. Their **baseline** is their own last message: everything you wrote since the baseline is unread, your earlier reports included. Task notifications, subagent hand-backs and workflow results are your input; the user sees only what you write.
+The user reads only the message that ends a turn, after coming back. They usually have several topics open in one session and several sessions open beside it, so each message covers one **topic**: the one the user just raised, or the one whose work just finished. A topic is finished when its deliverable reaches the state the user asked for (answer given, PR open, data delivered) or the user drops it. Task notifications, subagent hand-backs, teammate messages, herdr notes and workflow results are your input; the user sees only what you write. Write in the user's language; the labels below (`Inne tematy`, `Nowa sesja`) stay as written.
 
-- While work is still running and nothing needs the user: one or two lines on progress since the baseline and what you are waiting for.
-- When the task finishes, or anything waits on the user (an answer, a decision, a login, a command to run), even while other work still runs: report from the baseline, as before → after in terms the user sees (the page, the data, the delivery, the PR). Include what failed or was skipped and each decision you made on your own, with its reason. Every such message carries the whole report and every open question in full, so each later turn-ending message repeats whatever is still open. Done when a reader who saw only the baseline and this message knows everything that happened and everything waiting on them. This overrides the i-have-adhd no-recap rule.
-- A question to the user stands alone: what is at stake, the options with their consequences, your recommendation, and what you do after each answer.
-- Use the user's vocabulary. A name coined during the work (unit IDs, check names, nicknames for fixes, a subagent's terms) gets a plain description instead, or a one-line definition on first use.
+Subagents and workflow stages skip this section and the herdr one: their final report goes to the orchestrator, in the shape its brief asks for.
+
+Order of a message: answer, finished-topic report, ponytail's skipped/risk line, `Inne tematy:` last.
+
+- **Answer first.** The first line answers what the user asked (yes or no, when the question is yes or no), then the detail. Aim for under ~1,000 characters; a finished-topic report may run longer, the rest goes out on request.
+- **Finished topic:** report it as before → after in terms the user sees (the page, the data, the delivery, the PR), with what failed or was skipped and each decision you made on your own, with its reason. This overrides the i-have-adhd no-recap rule.
+- **Other topics:** an `Inne tematy:` block of at most 5 lines, one per topic that changed since the user's last message or waits on them: name, state, what it waits on. Topics waiting on the user come first; past 5, end with `+N więcej`. A topic that did not change stays out. The whole picture across all topics goes out when the user asks for status ("status", "co zostało", "gdzie jesteśmy").
+- **Background events** (a notification or hand-back while work still runs): at most one line, unless it finishes a topic or needs the user. Then report that topic as above.
+- **Decisions:** one per message where you can, at most 3, numbered, each with options, consequences, your recommendation and a reply template (`np. „1 tak, 2 B”`). Each question stands alone: it names its subject without pointing back to earlier messages. More than 3 open: ask the ones that block work and keep the rest in the task list.
+- **Names:** each ticket, PR, file or number carries 3–5 words on what it is, every time it appears (`#683 (ponawianie przy 429)`). A name coined during the work (unit IDs, check names, nicknames for fixes, a subagent's terms) gets the plain description instead.
+- **Open items live in the task list** (TaskCreate in Claude Code, `todo` in omp), one item per topic in the user's words. A pending decision, a drafted but unsent message (Slack, Linear, email) and a promised follow-up are items too. An item closes when it is done, or when the user drops it.
+
+## Topics in separate sessions (herdr)
+
+When `$HC_TERMINAL_ID` is set, the session runs in herdr (`hc --help`). When the user raises a new topic mid-session that needs its own investigation, change or PR, offer it a session of its own in one line, once per topic: `Nowa sesja „<nazwa>”? (tak/nie)`. Questions, lookups and one-file edits stay here, and side tasks you start yourself still go to subagents. On yes, or when the user asks for a new session:
+
+1. Write a self-contained brief to `/tmp/spinoff-<name>.md` as the user's first message in that session, opening with a plain sentence: the goal in the user's words, the repo, what is known so far with sources, open decisions, and this session's title. `<name>` is 1–32 of `a-z0-9-_`.
+2. Start it as a tab in this session's herdr space:
+
+   ```sh
+   sp=$(hc get "$HC_TERMINAL_ID" --json | jq -r '.labels["herdr.space"]')
+   hc run --bg --no-parent --name <name> --label herdr.space="$sp" --cwd <repo> -- claude --settings ~/.claude/settings.machine.json "$(cat /tmp/spinoff-<name>.md)"
+   ```
+
+   Without the `herdr.space` label the terminal runs headless and never shows as a tab. `--no-parent` keeps it running after this session ends and keeps its notes out of this one. Drop `--settings …` on a machine without that file; in omp, end the command with `-- omp @/tmp/spinoff-<name>.md`.
+3. Done when `hc get <name>` shows `labels.where` (the tab) and `hc read <name>` shows the agent working on the brief. A folder Claude Code has not been trusted in (`~` itself, a new clone) stops on the "trust this folder" prompt: tell the user to confirm it in that tab, since trusting a folder is their call. Keep the topic's task item open, retitled `→ sesja <name>`, until that session finishes it.
+
+Before asking the user which session owns a topic, or whether another session did something, look yourself: `hc ls` lists every session with its folder, tab and status, and `hc read <t>` prints its screen. For status across sessions, give one line per session from `hc ls`.
 
 ## Commit attribution
 
