@@ -1,13 +1,13 @@
 {
-  "attribution": {
-    "commit": "",
-    "pr": ""
-  },
   "env": {
     "CLAUDE_CODE_ENABLE_TODO_TOOLS": "1",
     "CLAUDE_AUTO_BACKGROUND_TASKS": "1",
     "CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS": "1",
     "CLAUDE_CODE_USE_POWERSHELL_TOOL": "1"
+  },
+  "attribution": {
+    "commit": "",
+    "pr": ""
   },
   "permissions": {
     "allow": [
@@ -15,6 +15,21 @@
       "Workflow(pipeline-implement)"
     ]
   },
+  "hooks": {
+    "SessionStart": [
+      {
+        "matcher": "^(startup|resume|clear|compact|fork)$",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=\"$HOME/.claude/hooks/herdr-agent-state.sh\"; [ -f \"$f\" ] && bash \"$f\" session || true",
+            "timeout": 10
+          }
+        ]
+      }
+    ]
+  },
+  "enableArtifact": false,
   "enabledPlugins": {
     "superpowers@superpowers-dev": true,
     "humanizer@humanizer": true,
@@ -133,20 +148,5 @@
   "autoCompactEnabled": true,
   "autoContinueAtUsageLimit": true,
   "inputNeededNotifEnabled": true,
-  "agentPushNotifEnabled": true,
-  "hooks": {
-    "SessionStart": [
-      {
-        "matcher": "^(startup|resume|clear|compact|fork)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "f=\"$HOME/.claude/hooks/herdr-agent-state.sh\"; [ -f \"$f\" ] && bash \"$f\" session || true",
-            "timeout": 10
-          }
-        ]
-      }
-    ]
-  },
-  "enableArtifact": false
+  "agentPushNotifEnabled": true
 }
