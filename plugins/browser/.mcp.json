@@ -2,10 +2,10 @@
   "mcpServers": {
     "browser": {
       "type": "stdio",
-      "command": "sh",
+      "command": "node",
       "args": [
-        "-c",
-        "mode=--wsEndpoint=ws://127.0.0.1:9222/devtools/browser; curl -sf --noproxy '*' -o /dev/null --max-time 1 http://127.0.0.1:9222/json/version && mode=--browserUrl=http://127.0.0.1:9222; exec npx -y chrome-devtools-mcp@1.13.0 \"$mode\""
+        "-e",
+        "const {spawn}=require('child_process');let started=0;const run=ok=>{if(started++)return;const a=['-y','chrome-devtools-mcp@1.13.0',ok?'--browserUrl=http://127.0.0.1:9222':'--wsEndpoint=ws://127.0.0.1:9222/devtools/browser'];const c=process.platform==='win32'?spawn('npx '+a.join(' '),{stdio:'inherit',shell:true}):spawn('npx',a,{stdio:'inherit'});for(const s of ['SIGINT','SIGTERM','SIGHUP'])process.on(s,()=>c.kill(s));c.on('exit',code=>process.exit(code??1))};const r=require('http').get('http://127.0.0.1:9222/json/version',{timeout:1000,agent:false},res=>{res.resume();run(res.statusCode<400)});r.on('timeout',()=>r.destroy());r.on('error',()=>run(false))"
       ]
     }
   }
